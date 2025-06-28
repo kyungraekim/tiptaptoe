@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { SimpleEditor } from "./components/SimpleEditor";
+import { GenerateButton } from "./components/GenerateButton";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
@@ -9,23 +10,24 @@ function App() {
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
-    // Clear save message when content changes
     if (savedMessage) {
       setSavedMessage("");
     }
   };
 
+  const handleSummaryGenerated = (summary: string) => {
+    // Append summary to existing content
+    const summaryHtml = `<h3>AI Generated Summary</h3><p>${summary}</p><br/>`;
+    const newContent = content ? content + summaryHtml : summaryHtml;
+    setContent(newContent);
+    setSavedMessage("Summary generated and added to document!");
+    setTimeout(() => setSavedMessage(""), 3000);
+  };
+
   const saveDocument = async () => {
     try {
-      // You can implement file saving here using Tauri's file system API
-      // For now, we'll just demonstrate with a success message
-      setSavedMessage("Document saved successfully!");
-      console.log("Document content:", content);
-      
-      // Example of calling a Rust function to save file
-      // await invoke("save_document", { content });
-      
-      // Auto-clear message after 3 seconds
+      const result = await invoke("save_document", { content });
+      setSavedMessage(typeof result === 'string' ? result : "Document saved successfully!");
       setTimeout(() => setSavedMessage(""), 3000);
     } catch (error) {
       console.error("Failed to save document:", error);
@@ -35,12 +37,9 @@ function App() {
 
   const loadDocument = async () => {
     try {
-      // Example of calling a Rust function to load file
-      // const loadedContent = await invoke("load_document");
-      // setContent(loadedContent);
-      
-      // For demo purposes, we'll just show a message
-      setSavedMessage("Load functionality would be implemented here");
+      const loadedContent = await invoke<string>("load_document");
+      setContent(loadedContent);
+      setSavedMessage("Document loaded successfully!");
       setTimeout(() => setSavedMessage(""), 3000);
     } catch (error) {
       console.error("Failed to load document:", error);
@@ -74,7 +73,7 @@ function App() {
             Tiptap Rich Text Editor
           </h1>
           <p style={{ margin: 0, color: "#666", fontSize: "0.875rem" }}>
-            A powerful rich text editor built with Tiptap and Tauri
+            A powerful rich text editor with AI-powered PDF summarization
           </p>
         </div>
         
@@ -122,6 +121,7 @@ function App() {
           >
             Save
           </button>
+          <GenerateButton onSummaryGenerated={handleSummaryGenerated} />
         </div>
       </header>
 

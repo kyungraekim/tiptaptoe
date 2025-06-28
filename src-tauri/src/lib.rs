@@ -1,6 +1,13 @@
 use std::fs;
 use std::path::Path;
 
+mod errors;
+mod pdf_processor;
+mod ai_client;
+mod commands;
+
+use commands::process_pdf_summarization;
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -34,7 +41,13 @@ fn load_document(file_path: Option<String>) -> Result<String, String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, save_document, load_document])
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![
+            greet, 
+            save_document, 
+            load_document,
+            process_pdf_summarization
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
