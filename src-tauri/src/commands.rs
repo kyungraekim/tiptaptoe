@@ -1,6 +1,5 @@
-// 5. Create src-tauri/src/commands.rs
 use crate::ai_client::OpenAIClient;
-use crate::pdf_processor::PdfProcessor;
+use crate::pdf_processor::{PdfProcessor, PdfInfo};
 use crate::errors::AppError;
 use serde::{Deserialize, Serialize};
 
@@ -18,6 +17,19 @@ pub struct PdfSummarizationRequest {
 #[derive(Serialize)]
 pub struct PdfSummarizationResponse {
     summary: String,
+    success: bool,
+    error: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct PdfAnalysisResponse {
+    #[serde(rename = "pageCount")]
+    page_count: usize,
+    title: String,
+    #[serde(rename = "hasText")]
+    has_text: bool,
+    #[serde(rename = "fileSize")]
+    file_size: String,
     success: bool,
     error: Option<String>,
 }
@@ -61,6 +73,41 @@ pub async fn process_pdf_summarization(
         }),
         Err(e) => Ok(PdfSummarizationResponse {
             summary: String::new(),
+            success: false,
+            error: Some(e.to_string()),
+        }),
+    }
+}
+
+#[tauri::command]
+pub async fn analyze_pdf(file_path: String) -> Result<PdfAnalysisResponse, String> {
+    match PdfProcessor::get_pdf_info(&file_path) {
+        Ok(info) => {
+            let metadata = std::fs::metadata(&file_path)
+                .map_err(|e| format!("Failed to get file info: {}", e))?;
+            
+            let file_size = if metadata.len() < 1024 {
+                format!("{} bytes", metadata.len())
+            } else if metadata.len() < 1024 * 1024 {
+                format!("{:.1} KB", metadata.len() as f64 / 1024.0)
+            } else {
+                format!("{:.1} MB", metadata.len() as f64 / (1024.0 * 1024.0))
+            };
+
+            Ok(PdfAnalysisResponse {
+                page_count: info.page_count,
+                title: info.title,
+                has_text: info.has_text,
+                file_size,
+                success: true,
+                error: None,
+            })
+        }
+        Err(e) => Ok(PdfAnalysisResponse {
+            page_count: 0,
+            title: "Unknown".to_string(),
+            has_text: false,
+            file_size: "Unknown".to_string(),
             success: false,
             error: Some(e.to_string()),
         }),
