@@ -17,13 +17,38 @@ export const Dropdown: React.FC<DropdownProps> = ({
   onOpenChange 
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0, shouldPositionAbove: false });
+  const [position, setPosition] = useState({ top: -9999, left: -9999, shouldPositionAbove: false });
+  const [isPositioned, setIsPositioned] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = () => {
     const newOpen = !open;
+    
+    // Calculate position immediately when opening
+    if (newOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      // Position dropdown above if there's not enough space below
+      const shouldPositionAbove = spaceBelow < 200 && spaceAbove > spaceBelow;
+      
+      setPosition({
+        top: shouldPositionAbove 
+          ? rect.top + window.scrollY - 4 // Position above with small gap
+          : rect.bottom + window.scrollY + 4, // Position below with small gap
+        left: Math.max(8, Math.min(rect.left + window.scrollX, window.innerWidth - 200)), // Keep within viewport
+        shouldPositionAbove
+      });
+      setIsPositioned(true);
+    } else if (!newOpen) {
+      setIsPositioned(false);
+      // Reset position when closing to prevent flash
+      setPosition({ top: -9999, left: -9999, shouldPositionAbove: false });
+    }
+
     if (onOpenChange) {
       onOpenChange(newOpen);
     } else {
@@ -47,6 +72,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
         left: Math.max(8, Math.min(rect.left + window.scrollX, window.innerWidth - 200)), // Keep within viewport
         shouldPositionAbove
       });
+      setIsPositioned(true);
     }
   };
 
@@ -89,7 +115,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   }, [open, onOpenChange]);
 
   // Use createPortal to render dropdown outside the component tree
-  const dropdownContent = open ? createPortal(
+  const dropdownContent = (open && isPositioned) ? createPortal(
     <div 
       ref={dropdownRef}
       className="tiptap-dropdown-content"
@@ -99,6 +125,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
         left: position.left,
         zIndex: 99999, // Very high z-index
         transformOrigin: position.shouldPositionAbove ? 'bottom center' : 'top center',
+        opacity: isPositioned ? 1 : 0, // Ensure it's only visible when positioned
+        visibility: isPositioned ? 'visible' : 'hidden', // Additional safety
       }}
     >
       {children}

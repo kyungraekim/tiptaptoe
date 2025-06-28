@@ -16,10 +16,18 @@
     padding: 0.25rem;
     max-height: 300px;
     overflow-y: auto;
-    /* Ensure smooth animations */
+    /* Prevent flashing by starting invisible */
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+}
+
+/* When properly positioned, make visible */
+.tiptap-dropdown-content[style*="opacity: 1"] {
     opacity: 1;
+    visibility: visible;
     transform: scale(1);
-    transition: opacity 0.1s ease, transform 0.1s ease;
 }
 
 .tiptap-dropdown-item {
