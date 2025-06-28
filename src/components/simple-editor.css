@@ -400,3 +400,20 @@
     border-color: hsl(213.1 93.9% 67.8%);
     box-shadow: 0 0 0 1px hsl(213.1 93.9% 67.8%);
 }
+
+/* Ensure toolbar and editor content don't interfere with dropdowns */
+.simple-editor .content-wrapper {
+    position: relative;
+    z-index: 1; /* Lower than dropdown */
+}
+
+.simple-editor .simple-editor-content {
+    position: relative;
+    z-index: 1; /* Lower than dropdown */
+}
+
+/* Ensure toolbar has proper z-index but lower than dropdowns */
+.simple-editor .tiptap-toolbar {
+    position: relative;
+    z-index: 2; /* Higher than content but lower than dropdowns */
+}
