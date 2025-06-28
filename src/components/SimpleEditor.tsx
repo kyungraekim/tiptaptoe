@@ -1,233 +1,266 @@
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import TextStyle from '@tiptap/extension-text-style'
-import FontFamily from '@tiptap/extension-font-family'
-import TextAlign from '@tiptap/extension-text-align'
-import Underline from '@tiptap/extension-underline'
-import Subscript from '@tiptap/extension-subscript'
-import Superscript from '@tiptap/extension-superscript'
-import Highlight from '@tiptap/extension-highlight'
-import Link from '@tiptap/extension-link'
-import { useState } from 'react'
-import './simple-editor.css'
+// src/components/SimpleEditor.tsx
+import React, { useRef, useEffect, useState } from 'react';
+import { EditorContent, EditorContext, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import TaskItem from '@tiptap/extension-task-item';
+import TaskList from '@tiptap/extension-task-list';
+import TextAlign from '@tiptap/extension-text-align';
+import Typography from '@tiptap/extension-typography';
+import Highlight from '@tiptap/extension-highlight';
+import Subscript from '@tiptap/extension-subscript';
+import Superscript from '@tiptap/extension-superscript';
+import Underline from '@tiptap/extension-underline';
+import Link from '@tiptap/extension-link';
+
+// UI Components
+import { Button } from './ui/Button';
+import { Spacer } from './ui/Spacer';
+import { Toolbar, ToolbarGroup, ToolbarSeparator } from './ui/Toolbar';
+
+// Toolbar Components
+import { HeadingDropdownMenu } from './toolbar/HeadingDropdownMenu';
+import { ImageUploadButton } from './toolbar/ImageUploadButton';
+import { ListDropdownMenu } from './toolbar/ListDropdownMenu';
+import { BlockquoteButton } from './toolbar/BlockquoteButton';
+import { CodeBlockButton } from './toolbar/CodeBlockButton';
+import {
+  ColorHighlightPopover,
+  ColorHighlightPopoverContent,
+  ColorHighlightPopoverButton,
+} from './toolbar/ColorHighlightPopover';
+import {
+  LinkPopover,
+  LinkContent,
+  LinkButton,
+} from './toolbar/LinkPopover';
+import { MarkButton } from './toolbar/MarkButton';
+import { TextAlignButton } from './toolbar/TextAlignButton';
+import { UndoRedoButton } from './toolbar/UndoRedoButton';
+import { ThemeToggle } from './toolbar/ThemeToggle';
+
+// Icons
+import { ArrowLeftIcon, HighlighterIcon, LinkIcon } from './icons';
+
+// Hooks
+import { useMobile } from '../hooks/useMobile';
+import { useWindowSize } from '../hooks/useWindowSize';
+import { useCursorVisibility } from '../hooks/useCursorVisibility';
+
+// Styles
+import './simple-editor.css';
+
+const defaultContent = `
+<h1>Welcome to Tiptap Simple Editor</h1>
+<p>This is a comprehensive rich text editor built with Tiptap and React. You can use it to create beautiful documents with various formatting options.</p>
+<h2>Features:</h2>
+<ul>
+  <li>Rich text formatting (bold, italic, underline, etc.)</li>
+  <li>Multiple heading levels</li>
+  <li>Lists (bullet, numbered, task lists)</li>
+  <li>Text alignment options</li>
+  <li>Highlighting and links</li>
+  <li>Images and blockquotes</li>
+  <li>Code blocks and inline code</li>
+</ul>
+<p>Start typing to see the editor in action!</p>
+`;
+
+const MainToolbarContent = ({
+  onHighlighterClick,
+  onLinkClick,
+  isMobile,
+}: {
+  onHighlighterClick: () => void;
+  onLinkClick: () => void;
+  isMobile: boolean;
+}) => {
+  return (
+    <>
+      <Spacer />
+
+      <ToolbarGroup>
+        <UndoRedoButton action="undo" />
+        <UndoRedoButton action="redo" />
+      </ToolbarGroup>
+
+      <ToolbarSeparator />
+
+      <ToolbarGroup>
+        <HeadingDropdownMenu levels={[1, 2, 3, 4]} />
+        <ListDropdownMenu types={["bulletList", "orderedList", "taskList"]} />
+        <BlockquoteButton />
+        <CodeBlockButton />
+      </ToolbarGroup>
+
+      <ToolbarSeparator />
+
+      <ToolbarGroup>
+        <MarkButton type="bold" />
+        <MarkButton type="italic" />
+        <MarkButton type="strike" />
+        <MarkButton type="code" />
+        <MarkButton type="underline" />
+        {!isMobile ? (
+          <ColorHighlightPopover />
+        ) : (
+          <ColorHighlightPopoverButton onClick={onHighlighterClick} />
+        )}
+        {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
+      </ToolbarGroup>
+
+      <ToolbarSeparator />
+
+      <ToolbarGroup>
+        <MarkButton type="superscript" />
+        <MarkButton type="subscript" />
+      </ToolbarGroup>
+
+      <ToolbarSeparator />
+
+      <ToolbarGroup>
+        <TextAlignButton align="left" />
+        <TextAlignButton align="center" />
+        <TextAlignButton align="right" />
+        <TextAlignButton align="justify" />
+      </ToolbarGroup>
+
+      <ToolbarSeparator />
+
+      <ToolbarGroup>
+        <ImageUploadButton text="Add" />
+      </ToolbarGroup>
+
+      <Spacer />
+
+      {isMobile && <ToolbarSeparator />}
+
+      <ToolbarGroup>
+        <ThemeToggle />
+      </ToolbarGroup>
+    </>
+  );
+};
+
+const MobileToolbarContent = ({
+  type,
+  onBack,
+}: {
+  type: "highlighter" | "link";
+  onBack: () => void;
+}) => (
+  <>
+    <ToolbarGroup>
+      <Button data-style="ghost" onClick={onBack}>
+        <ArrowLeftIcon className="tiptap-button-icon" />
+        {type === "highlighter" ? (
+          <HighlighterIcon className="tiptap-button-icon" />
+        ) : (
+          <LinkIcon className="tiptap-button-icon" />
+        )}
+      </Button>
+    </ToolbarGroup>
+
+    <ToolbarSeparator />
+
+    {type === "highlighter" ? (
+      <ColorHighlightPopoverContent />
+    ) : (
+      <LinkContent />
+    )}
+  </>
+);
 
 interface SimpleEditorProps {
-  content?: string
-  onChange?: (content: string) => void
+  content?: string;
+  onChange?: (content: string) => void;
 }
 
-export function SimpleEditor({ content = '', onChange }: SimpleEditorProps) {
-  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false)
-  const [linkUrl, setLinkUrl] = useState('')
+export function SimpleEditor({ content, onChange }: SimpleEditorProps) {
+  const isMobile = useMobile();
+  const windowSize = useWindowSize();
+  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">("main");
+  const toolbarRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
+    immediatelyRender: false,
+    editorProps: {
+      attributes: {
+        autocomplete: "off",
+        autocorrect: "off",
+        autocapitalize: "off",
+        "aria-label": "Main content area, start typing to enter text.",
+      },
+    },
     extensions: [
       StarterKit,
-      TextStyle,
-      FontFamily,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
       Underline,
-      Subscript,
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      Highlight.configure({ multicolor: true }),
+      Image,
+      Typography,
       Superscript,
-      Highlight.configure({
-        multicolor: true,
-      }),
-      Link.configure({
-        openOnClick: false,
-      }),
+      Subscript,
+      Link.configure({ openOnClick: false }),
     ],
-    content,
+    content: content || defaultContent,
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML())
+      onChange?.(editor.getHTML());
     },
-  })
+  });
 
-  if (!editor) {
-    return null
-  }
+  const bodyRect = useCursorVisibility({
+    editor,
+    overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
+  });
 
-  const addLink = () => {
-    if (linkUrl) {
-      editor.chain().focus().setLink({ href: linkUrl }).run()
-      setLinkUrl('')
-      setIsLinkDialogOpen(false)
+  useEffect(() => {
+    if (!isMobile && mobileView !== "main") {
+      setMobileView("main");
     }
-  }
-
-  const removeLink = () => {
-    editor.chain().focus().unsetLink().run()
-  }
+  }, [isMobile, mobileView]);
 
   return (
-    <div className="simple-editor">
-      <div className="toolbar">
-        <div className="toolbar-group">
-          <button
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            className={editor.isActive('bold') ? 'is-active' : ''}
-            title="Bold"
-          >
-            <strong>B</strong>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={editor.isActive('italic') ? 'is-active' : ''}
-            title="Italic"
-          >
-            <em>I</em>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={editor.isActive('underline') ? 'is-active' : ''}
-            title="Underline"
-          >
-            <u>U</u>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            className={editor.isActive('strike') ? 'is-active' : ''}
-            title="Strike"
-          >
-            <s>S</s>
-          </button>
-        </div>
-
-        <div className="toolbar-group">
-          <button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={editor.isActive('heading', { level: 1 }) ? 'is-active' : ''}
-            title="Heading 1"
-          >
-            H1
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={editor.isActive('heading', { level: 2 }) ? 'is-active' : ''}
-            title="Heading 2"
-          >
-            H2
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className={editor.isActive('heading', { level: 3 }) ? 'is-active' : ''}
-            title="Heading 3"
-          >
-            H3
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setParagraph().run()}
-            className={editor.isActive('paragraph') ? 'is-active' : ''}
-            title="Paragraph"
-          >
-            P
-          </button>
-        </div>
-
-        <div className="toolbar-group">
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('left').run()}
-            className={editor.isActive({ textAlign: 'left' }) ? 'is-active' : ''}
-            title="Align Left"
-          >
-            ←
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('center').run()}
-            className={editor.isActive({ textAlign: 'center' }) ? 'is-active' : ''}
-            title="Align Center"
-          >
-            ↔
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('right').run()}
-            className={editor.isActive({ textAlign: 'right' }) ? 'is-active' : ''}
-            title="Align Right"
-          >
-            →
-          </button>
-        </div>
-
-        <div className="toolbar-group">
-          <button
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={editor.isActive('bulletList') ? 'is-active' : ''}
-            title="Bullet List"
-          >
-            •
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={editor.isActive('orderedList') ? 'is-active' : ''}
-            title="Numbered List"
-          >
-            1.
-          </button>
-        </div>
-
-        <div className="toolbar-group">
-          <button
-            onClick={() => editor.chain().focus().toggleHighlight().run()}
-            className={editor.isActive('highlight') ? 'is-active' : ''}
-            title="Highlight"
-          >
-            🖍
-          </button>
-          <button
-            onClick={() => setIsLinkDialogOpen(true)}
-            className={editor.isActive('link') ? 'is-active' : ''}
-            title="Add Link"
-          >
-            🔗
-          </button>
-          {editor.isActive('link') && (
-            <button onClick={removeLink} title="Remove Link">
-              ❌
-            </button>
+    <EditorContext.Provider value={{ editor }}>
+      <div className="simple-editor">
+        <Toolbar
+          ref={toolbarRef}
+          style={
+            isMobile
+              ? {
+                  position: 'fixed',
+                  bottom: `calc(100% - ${windowSize.height - bodyRect.y}px)`,
+                  left: 0,
+                  right: 0,
+                  zIndex: 50,
+                }
+              : {}
+          }
+        >
+          {mobileView === "main" ? (
+            <MainToolbarContent
+              onHighlighterClick={() => setMobileView("highlighter")}
+              onLinkClick={() => setMobileView("link")}
+              isMobile={isMobile}
+            />
+          ) : (
+            <MobileToolbarContent
+              type={mobileView === "highlighter" ? "highlighter" : "link"}
+              onBack={() => setMobileView("main")}
+            />
           )}
-        </div>
+        </Toolbar>
 
-        <div className="toolbar-group">
-          <button
-            onClick={() => editor.chain().focus().undo().run()}
-            disabled={!editor.can().undo()}
-            title="Undo"
-          >
-            ↶
-          </button>
-          <button
-            onClick={() => editor.chain().focus().redo().run()}
-            disabled={!editor.can().redo()}
-            title="Redo"
-          >
-            ↷
-          </button>
+        <div className="content-wrapper">
+          <EditorContent
+            editor={editor}
+            role="presentation"
+            className="simple-editor-content"
+          />
         </div>
       </div>
-
-      {isLinkDialogOpen && (
-        <div className="link-dialog">
-          <input
-            type="url"
-            placeholder="Enter URL"
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                addLink()
-              } else if (e.key === 'Escape') {
-                setIsLinkDialogOpen(false)
-              }
-            }}
-            autoFocus
-          />
-          <button onClick={addLink}>Add Link</button>
-          <button onClick={() => setIsLinkDialogOpen(false)}>Cancel</button>
-        </div>
-      )}
-
-      <EditorContent editor={editor} className="editor-content" />
-    </div>
-  )
+    </EditorContext.Provider>
+  );
 }

@@ -1,0 +1,105 @@
+/* src/components/ui/button.css */
+.tiptap-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    color: inherit;
+    min-height: 2rem;
+    padding: 0 0.75rem;
+}
+
+.tiptap-button[data-size="sm"] {
+    min-height: 1.75rem;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+}
+
+.tiptap-button[data-size="lg"] {
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    font-size: 1rem;
+}
+
+.tiptap-button[data-style="default"] {
+    background: hsl(210 40% 98%);
+    border-color: hsl(210 40% 80%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+.tiptap-button[data-style="default"]:hover {
+    background: hsl(210 40% 96%);
+    border-color: hsl(210 40% 70%);
+}
+
+.tiptap-button[data-style="ghost"]:hover {
+    background: hsl(210 40% 98%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+.tiptap-button[data-style="outline"] {
+    border-color: hsl(214.3 31.8% 91.4%);
+    background: transparent;
+}
+
+.tiptap-button[data-style="outline"]:hover {
+    background: hsl(210 40% 98%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+.tiptap-button[data-state="active"] {
+    background: hsl(210 40% 92%);
+    color: hsl(222.2 84% 4.9%);
+    border-color: hsl(210 40% 80%);
+}
+
+.tiptap-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tiptap-button-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .tiptap-button[data-style="default"] {
+        background: hsl(222.2 84% 4.9%);
+        border-color: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+
+    .tiptap-button[data-style="default"]:hover {
+        background: hsl(217.2 32.6% 17.5%);
+        border-color: hsl(217.2 32.6% 25%);
+    }
+
+    .tiptap-button[data-style="ghost"]:hover {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+
+    .tiptap-button[data-style="outline"] {
+        border-color: hsl(217.2 32.6% 17.5%);
+    }
+
+    .tiptap-button[data-style="outline"]:hover {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+
+    .tiptap-button[data-state="active"] {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+        border-color: hsl(217.2 32.6% 25%);
+    }
+}

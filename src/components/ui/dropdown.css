@@ -1,0 +1,61 @@
+/* src/components/ui/dropdown.css */
+.tiptap-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.tiptap-dropdown-content {
+    position: fixed;
+    z-index: 9999;
+    min-width: 8rem;
+    background: hsl(0 0% 100%);
+    border: 1px solid hsl(214.3 31.8% 91.4%);
+    border-radius: 0.375rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    padding: 0.25rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.tiptap-dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    color: inherit;
+}
+
+.tiptap-dropdown-item:hover {
+    background: hsl(210 40% 98%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+.tiptap-dropdown-item[data-state="active"] {
+    background: hsl(210 40% 92%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .tiptap-dropdown-content {
+        background: hsl(222.2 84% 4.9%);
+        border-color: hsl(217.2 32.6% 17.5%);
+    }
+
+    .tiptap-dropdown-item:hover {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+
+    .tiptap-dropdown-item[data-state="active"] {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+}
