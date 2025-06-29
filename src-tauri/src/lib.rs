@@ -1,3 +1,4 @@
+// src-tauri/src/lib.rs
 use std::fs;
 use std::path::Path;
 
@@ -6,7 +7,7 @@ mod pdf_processor;
 mod ai_client;
 mod commands;
 
-use commands::{process_pdf_summarization, analyze_pdf};
+use commands::{process_pdf_summarization, analyze_pdf, test_ai_connection};
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -47,7 +48,8 @@ pub fn run() {
             save_document, 
             load_document,
             process_pdf_summarization,
-            analyze_pdf
+            analyze_pdf,
+            test_ai_connection
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

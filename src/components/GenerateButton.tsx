@@ -1,7 +1,9 @@
+// src/components/GenerateButton.tsx
 import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import type { PdfSummarizationResponse, ProcessingStatus } from '../types/ai';
+import { loadAISettings, validateAISettings } from '../utils/settingsStorage';
 
 interface GenerateButtonProps {
   onSummaryGenerated: (summary: string) => void;
@@ -18,7 +20,17 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
     console.log("Generate button clicked");
     
     try {
-      // Step 1: Select PDF file
+      // Step 1: Load and validate AI settings
+      const settings = loadAISettings();
+      const validation = validateAISettings(settings);
+      
+      if (!validation.isValid) {
+        const errorMsg = `Please configure AI settings first:\n${validation.errors.join('\n')}`;
+        alert(errorMsg);
+        return;
+      }
+
+      // Step 2: Select PDF file
       console.log("Opening file dialog...");
       const selectedFile = await open({
         multiple: false,
@@ -41,12 +53,14 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
         message: 'Processing PDF file...'
       });
 
-      // Step 2: Get API configuration (for now, using hardcoded values)
-      const apiKey = localStorage.getItem('openai_api_key') || 'your-api-key-here';
-      const prompt = "Please provide a concise summary of this PDF document, highlighting the main points and key insights.";
-
-      console.log("API Key exists:", !!apiKey && apiKey !== 'your-api-key-here');
-      console.log("Using prompt:", prompt);
+      console.log("Using AI settings:", {
+        baseUrl: settings.baseUrl,
+        model: settings.model,
+        hasApiKey: !!settings.apiKey,
+        maxTokens: settings.maxTokens,
+        temperature: settings.temperature,
+        timeout: settings.timeout
+      });
 
       setStatus({
         isProcessing: true,
@@ -54,18 +68,18 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
         message: 'Generating summary with AI...'
       });
 
-      // Step 3: Call Tauri command
-      console.log("Calling Tauri command with params:", {
-        filePath: selectedFile,
-        prompt: prompt.substring(0, 50) + "...",
-        baseUrl: 'https://api.openai.com/v1'
-      });
+      // Step 3: Call Tauri command with configured settings
+      console.log("Calling Tauri command with configured settings");
 
       const response = await invoke<PdfSummarizationResponse>('process_pdf_summarization', {
         filePath: selectedFile,
-        prompt,
-        apiKey,
-        baseUrl: 'https://api.openai.com/v1'
+        prompt: settings.prompt,
+        apiKey: settings.apiKey,
+        baseUrl: settings.baseUrl,
+        model: settings.model,
+        maxTokens: settings.maxTokens,
+        temperature: settings.temperature,
+        timeout: settings.timeout
       });
 
       console.log("Received response from Tauri:", response);
@@ -102,7 +116,21 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
         message: 'Failed to generate summary'
       });
       
-      alert(`Failed to generate summary: ${error}`);
+      // Better error messages for users
+      let userMessage = 'Failed to generate summary';
+      if (error instanceof Error) {
+        if (error.message.includes('API key')) {
+          userMessage = 'Invalid API key. Please check your AI settings.';
+        } else if (error.message.includes('network') || error.message.includes('timeout')) {
+          userMessage = 'Network error. Please check your internet connection and AI service URL.';
+        } else if (error.message.includes('model')) {
+          userMessage = 'Invalid model selected. Please check your AI settings.';
+        } else {
+          userMessage = `Error: ${error.message}`;
+        }
+      }
+      
+      alert(userMessage);
     } finally {
       // Reset status after a short delay
       setTimeout(() => {
@@ -133,52 +161,22 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
           minWidth: "80px"
         }}
       >
-        {status.isProcessing ? "Processing..." : "Generate"}
+        {status.isProcessing ? 'Processing...' : 'Generate'}
       </button>
       
+      {/* Progress indicator */}
       {status.isProcessing && (
         <div style={{
-          position: "absolute",
-          top: "100%",
-          left: 0,
-          right: 0,
-          marginTop: "8px",
-          padding: "8px",
-          backgroundColor: "#f9fafb",
-          border: "1px solid #e5e7eb",
-          borderRadius: "6px",
-          fontSize: "12px",
-          color: "#374151",
-          zIndex: 1000,
-          minWidth: "200px",
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+          position: 'absolute',
+          top: '100%',
+          left: '0',
+          right: '0',
+          marginTop: '4px',
+          fontSize: '12px',
+          color: '#6b7280',
+          textAlign: 'center'
         }}>
-          <div style={{ marginBottom: "6px", fontWeight: "500" }}>
-            {status.message}
-          </div>
-          <div style={{
-            width: "100%",
-            height: "8px",
-            backgroundColor: "#e5e7eb",
-            borderRadius: "4px",
-            overflow: "hidden"
-          }}>
-            <div style={{
-              width: `${status.progress}%`,
-              height: "100%",
-              backgroundColor: "#10b981",
-              borderRadius: "4px",
-              transition: "width 0.3s ease"
-            }}></div>
-          </div>
-          <div style={{ 
-            marginTop: "4px", 
-            fontSize: "11px", 
-            color: "#6b7280",
-            textAlign: "right"
-          }}>
-            {status.progress}%
-          </div>
+          {status.message} ({status.progress}%)
         </div>
       )}
     </div>

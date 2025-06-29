@@ -1,13 +1,21 @@
-import { useState, useRef } from "react";
+// src/App.tsx
+import { useState, useRef, useEffect } from "react";
 import { SimpleEditor } from "./components/SimpleEditor";
 import { GenerateButton } from "./components/GenerateButton";
+import { SettingsIcon } from "./components/SettingsIcon";
 import { invoke } from "@tauri-apps/api/core";
+import { migrateOldSettings } from "./utils/settingsStorage";
 import "./App.css";
 
 function App() {
   const [content, setContent] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
   const editorRef = useRef<any>(null);
+
+  // Migrate old settings on app start
+  useEffect(() => {
+    migrateOldSettings();
+  }, []);
 
   const handleContentChange = (newContent: string) => {
     console.log("Content changed from editor:", newContent.substring(0, 100) + "...");
@@ -33,15 +41,25 @@ function App() {
         editor.commands.insertContent('<br/><br/>');
       }
       
-      // Insert the summary
-      const summaryHtml = `<h3>AI Generated Summary</h3><p>${summary}</p>`;
+      // Insert the summary with better formatting
+      const summaryHtml = `
+        <div style="border-left: 4px solid #10b981; padding-left: 16px; margin: 16px 0;">
+          <h3 style="color: #10b981; margin: 0 0 8px 0;">AI Generated Summary</h3>
+          <p style="margin: 0; line-height: 1.6;">${summary}</p>
+        </div>
+      `;
       editor.commands.insertContent(summaryHtml);
       
       console.log("Summary appended using editor commands");
     } else {
       // Fallback to state update if editor ref is not available
       console.log("Editor ref not available, using state update");
-      const summaryHtml = `<div><h3>AI Generated Summary</h3><p>${summary}</p></div>`;
+      const summaryHtml = `
+        <div style="border-left: 4px solid #10b981; padding-left: 16px; margin: 16px 0;">
+          <h3 style="color: #10b981; margin: 0 0 8px 0;">AI Generated Summary</h3>
+          <p style="margin: 0; line-height: 1.6;">${summary}</p>
+        </div>
+      `;
       const newContent = content ? content + summaryHtml : summaryHtml;
       setContent(newContent);
     }
@@ -153,6 +171,7 @@ function App() {
             Save
           </button>
           <GenerateButton onSummaryGenerated={handleSummaryGenerated} />
+          <SettingsIcon />
         </div>
       </header>
 
@@ -160,47 +179,42 @@ function App() {
         <div style={{
           padding: "12px 16px",
           backgroundColor: "#f0f9ff",
-          border: "1px solid #bae6fd",
+          border: "1px solid #0ea5e9",
           borderRadius: "6px",
-          marginBottom: "20px",
-          color: "#0369a1",
-          fontSize: "14px"
+          color: "#0c4a6e",
+          fontSize: "14px",
+          marginBottom: "16px"
         }}>
           {savedMessage}
         </div>
       )}
 
-      <SimpleEditor 
-        ref={editorRef}
-        content={content} 
-        onChange={handleContentChange}
-      />
-      
-      <footer style={{ 
-        marginTop: "20px", 
-        paddingTop: "20px", 
-        borderTop: "1px solid #e5e7eb",
-        fontSize: "12px", 
-        color: "#6b7280" 
+      <div style={{
+        border: "2px solid #e5e7eb",
+        borderRadius: "8px",
+        backgroundColor: "white",
+        overflow: "hidden"
       }}>
-        <details>
-          <summary style={{ cursor: "pointer", marginBottom: "10px" }}>
-            View Raw HTML Output
-          </summary>
-          <pre style={{ 
-            background: "#f9fafb", 
-            padding: "12px", 
-            borderRadius: "6px",
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
-            fontSize: "11px",
-            border: "1px solid #e5e7eb",
-            maxHeight: "200px",
-            overflow: "auto"
-          }}>
-            {content || "No content yet..."}
-          </pre>
-        </details>
+        <SimpleEditor 
+          ref={editorRef}
+          content={content} 
+          onChange={handleContentChange} 
+        />
+      </div>
+      
+      <footer style={{
+        marginTop: "20px",
+        padding: "16px",
+        backgroundColor: "#f9fafb",
+        borderRadius: "6px",
+        fontSize: "12px",
+        color: "#6b7280",
+        textAlign: "center"
+      }}>
+        <p style={{ margin: 0 }}>
+          Click the <strong>Generate</strong> button to upload a PDF and generate an AI summary. 
+          Use the <strong>⚙️ Settings</strong> icon to configure your AI provider and preferences.
+        </p>
       </footer>
     </div>
   );
