@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { SimpleEditor } from "./components/SimpleEditor";
 import { GenerateButton } from "./components/GenerateButton";
 import { invoke } from "@tauri-apps/api/core";
@@ -7,8 +7,10 @@ import "./App.css";
 function App() {
   const [content, setContent] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
+  const editorRef = useRef<any>(null);
 
   const handleContentChange = (newContent: string) => {
+    console.log("Content changed from editor:", newContent.substring(0, 100) + "...");
     setContent(newContent);
     if (savedMessage) {
       setSavedMessage("");
@@ -16,16 +18,41 @@ function App() {
   };
 
   const handleSummaryGenerated = (summary: string) => {
-    // Append summary to existing content
-    const summaryHtml = `<h3>AI Generated Summary</h3><p>${summary}</p><br/>`;
-    const newContent = content ? content + summaryHtml : summaryHtml;
-    setContent(newContent);
+    console.log("Summary received:", summary);
+    console.log("Current content before update:", content);
+    
+    // Use the editor's commands to append content instead of replacing it
+    if (editorRef.current) {
+      const editor = editorRef.current;
+      
+      // Move cursor to the end
+      editor.commands.focus('end');
+      
+      // Add some spacing if there's existing content
+      if (content.trim()) {
+        editor.commands.insertContent('<br/><br/>');
+      }
+      
+      // Insert the summary
+      const summaryHtml = `<h3>AI Generated Summary</h3><p>${summary}</p>`;
+      editor.commands.insertContent(summaryHtml);
+      
+      console.log("Summary appended using editor commands");
+    } else {
+      // Fallback to state update if editor ref is not available
+      console.log("Editor ref not available, using state update");
+      const summaryHtml = `<div><h3>AI Generated Summary</h3><p>${summary}</p></div>`;
+      const newContent = content ? content + summaryHtml : summaryHtml;
+      setContent(newContent);
+    }
+    
     setSavedMessage("Summary generated and added to document!");
     setTimeout(() => setSavedMessage(""), 3000);
   };
 
   const saveDocument = async () => {
     try {
+      console.log("Saving content:", content);
       const result = await invoke("save_document", { content });
       setSavedMessage(typeof result === 'string' ? result : "Document saved successfully!");
       setTimeout(() => setSavedMessage(""), 3000);
@@ -38,6 +65,7 @@ function App() {
   const loadDocument = async () => {
     try {
       const loadedContent = await invoke<string>("load_document");
+      console.log("Loaded content:", loadedContent);
       setContent(loadedContent);
       setSavedMessage("Document loaded successfully!");
       setTimeout(() => setSavedMessage(""), 3000);
@@ -52,6 +80,9 @@ function App() {
     setSavedMessage("New document created");
     setTimeout(() => setSavedMessage(""), 2000);
   };
+
+  // Debug: Log whenever content state changes
+  console.log("Current content state:", content ? content.substring(0, 100) + "..." : "empty");
 
   return (
     <div style={{ 
@@ -140,6 +171,7 @@ function App() {
       )}
 
       <SimpleEditor 
+        ref={editorRef}
         content={content} 
         onChange={handleContentChange}
       />

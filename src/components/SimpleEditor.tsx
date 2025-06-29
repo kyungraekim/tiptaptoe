@@ -1,4 +1,3 @@
-// src/components/SimpleEditor.tsx
 import React, { useRef, useEffect, useState } from 'react';
 import { EditorContent, EditorContext, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -176,7 +175,8 @@ interface SimpleEditorProps {
   onChange?: (content: string) => void;
 }
 
-export function SimpleEditor({ content, onChange }: SimpleEditorProps) {
+export const SimpleEditor = React.forwardRef<any, SimpleEditorProps>(
+  ({ content, onChange }, ref) => {
   const isMobile = useMobile();
   const windowSize = useWindowSize();
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">("main");
@@ -207,9 +207,34 @@ export function SimpleEditor({ content, onChange }: SimpleEditorProps) {
     ],
     content: content || defaultContent,
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML());
+      const newContent = editor.getHTML();
+      console.log("Editor content updated:", newContent.substring(0, 100) + "...");
+      onChange?.(newContent);
     },
   });
+
+  // Expose the editor instance via ref
+  React.useImperativeHandle(ref, () => editor, [editor]);
+
+  // Critical fix: Sync external content changes to the editor
+  useEffect(() => {
+    if (editor && content !== undefined) {
+      const currentContent = editor.getHTML();
+      
+      console.log("Content prop changed:", content ? content.substring(0, 100) + "..." : "empty");
+      console.log("Current editor content:", currentContent ? currentContent.substring(0, 100) + "..." : "empty");
+      
+      // Only update if the content is different to avoid infinite loops
+      if (currentContent !== content) {
+        console.log("Updating editor content to match prop");
+        // Use setTimeout to avoid potential race conditions
+        // Set addToHistory to false to prevent adding to undo stack when updating from external source
+        setTimeout(() => {
+          editor.commands.setContent(content || defaultContent, false, { preserveWhitespace: 'full' });
+        }, 0);
+      }
+    }
+  }, [editor, content]);
 
   const bodyRect = useCursorVisibility({
     editor,
@@ -221,6 +246,18 @@ export function SimpleEditor({ content, onChange }: SimpleEditorProps) {
       setMobileView("main");
     }
   }, [isMobile, mobileView]);
+
+  // Debug: Log editor creation and destruction
+  useEffect(() => {
+    if (editor) {
+      console.log("Editor initialized with content:", editor.getHTML().substring(0, 100) + "...");
+    }
+    return () => {
+      if (editor) {
+        console.log("Editor destroyed");
+      }
+    };
+  }, [editor]);
 
   return (
     <EditorContext.Provider value={{ editor }}>
@@ -263,4 +300,4 @@ export function SimpleEditor({ content, onChange }: SimpleEditorProps) {
       </div>
     </EditorContext.Provider>
   );
-}
+});

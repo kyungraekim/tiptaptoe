@@ -15,8 +15,11 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
   });
 
   const handleGenerate = async () => {
+    console.log("Generate button clicked");
+    
     try {
       // Step 1: Select PDF file
+      console.log("Opening file dialog...");
       const selectedFile = await open({
         multiple: false,
         filters: [{
@@ -26,8 +29,11 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
       });
 
       if (!selectedFile) {
+        console.log("User cancelled file selection");
         return; // User cancelled
       }
+
+      console.log("File selected:", selectedFile);
 
       setStatus({
         isProcessing: true,
@@ -39,6 +45,9 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
       const apiKey = localStorage.getItem('openai_api_key') || 'your-api-key-here';
       const prompt = "Please provide a concise summary of this PDF document, highlighting the main points and key insights.";
 
+      console.log("API Key exists:", !!apiKey && apiKey !== 'your-api-key-here');
+      console.log("Using prompt:", prompt);
+
       setStatus({
         isProcessing: true,
         progress: 50,
@@ -46,12 +55,20 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
       });
 
       // Step 3: Call Tauri command
+      console.log("Calling Tauri command with params:", {
+        filePath: selectedFile,
+        prompt: prompt.substring(0, 50) + "...",
+        baseUrl: 'https://api.openai.com/v1'
+      });
+
       const response = await invoke<PdfSummarizationResponse>('process_pdf_summarization', {
         filePath: selectedFile,
         prompt,
         apiKey,
         baseUrl: 'https://api.openai.com/v1'
       });
+
+      console.log("Received response from Tauri:", response);
 
       setStatus({
         isProcessing: true,
@@ -60,17 +77,36 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
       });
 
       if (response.success) {
+        console.log("Summary generated successfully:", response.summary);
+        console.log("Calling onSummaryGenerated callback...");
         onSummaryGenerated(response.summary);
+        console.log("Callback completed");
       } else {
+        console.error("Summary generation failed:", response.error);
         throw new Error(response.error || 'Failed to generate summary');
       }
 
     } catch (error) {
       console.error('PDF summarization failed:', error);
+      
+      // More detailed error logging
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      
+      setStatus({
+        isProcessing: false,
+        progress: 0,
+        message: 'Failed to generate summary'
+      });
+      
       alert(`Failed to generate summary: ${error}`);
     } finally {
       // Reset status after a short delay
       setTimeout(() => {
+        console.log("Resetting status");
         setStatus({
           isProcessing: false,
           progress: 0,
@@ -102,32 +138,46 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
       
       {status.isProcessing && (
         <div style={{
-          position: 'absolute',
-          top: '100%',
-          left: '0',
-          right: '0',
-          marginTop: '8px',
-          padding: '8px 12px',
-          backgroundColor: '#f8fafc',
-          border: '1px solid #e2e8f0',
-          borderRadius: '6px',
-          fontSize: '12px',
-          zIndex: 1000
+          position: "absolute",
+          top: "100%",
+          left: 0,
+          right: 0,
+          marginTop: "8px",
+          padding: "8px",
+          backgroundColor: "#f9fafb",
+          border: "1px solid #e5e7eb",
+          borderRadius: "6px",
+          fontSize: "12px",
+          color: "#374151",
+          zIndex: 1000,
+          minWidth: "200px",
+          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
         }}>
-          <div style={{ marginBottom: '4px' }}>{status.message}</div>
+          <div style={{ marginBottom: "6px", fontWeight: "500" }}>
+            {status.message}
+          </div>
           <div style={{
-            width: '100%',
-            height: '4px',
-            backgroundColor: '#e2e8f0',
-            borderRadius: '2px',
-            overflow: 'hidden'
+            width: "100%",
+            height: "8px",
+            backgroundColor: "#e5e7eb",
+            borderRadius: "4px",
+            overflow: "hidden"
           }}>
             <div style={{
               width: `${status.progress}%`,
-              height: '100%',
-              backgroundColor: '#10b981',
-              transition: 'width 0.3s ease'
-            }} />
+              height: "100%",
+              backgroundColor: "#10b981",
+              borderRadius: "4px",
+              transition: "width 0.3s ease"
+            }}></div>
+          </div>
+          <div style={{ 
+            marginTop: "4px", 
+            fontSize: "11px", 
+            color: "#6b7280",
+            textAlign: "right"
+          }}>
+            {status.progress}%
           </div>
         </div>
       )}
