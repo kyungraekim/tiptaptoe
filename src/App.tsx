@@ -5,6 +5,7 @@ import { GenerateButton } from "./components/GenerateButton";
 import { SettingsIcon } from "./components/SettingsIcon";
 import { invoke } from "@tauri-apps/api/core";
 import { migrateOldSettings } from "./utils/settingsStorage";
+import { marked } from "marked";
 import "./App.css";
 
 function App() {
@@ -28,28 +29,23 @@ function App() {
   const handleSummaryGenerated = (summary: string) => {
     console.log("Summary received:", summary);
     console.log("Current content before update:", content);
-    
-    // Use the editor's commands to append content instead of replacing it
+
+    // Convert Markdown to HTML
+    const summaryHtml = marked.parse(summary);
+
     if (editorRef.current) {
       const editor = editorRef.current;
-      
+
       // Move cursor to the end
       editor.commands.focus('end');
-      
+
       // Add some spacing if there's existing content
       if (content.trim()) {
         editor.commands.insertContent('<br/><br/>');
       }
-      
-      // Insert the summary with better formatting
-      const summaryHtml = `
-        <div style="border-left: 4px solid #10b981; padding-left: 16px; margin: 16px 0;">
-          <h3 style="color: #10b981; margin: 0 0 8px 0;">AI Generated Summary</h3>
-          <p style="margin: 0; line-height: 1.6;">${summary}</p>
-        </div>
-      `;
+
       editor.commands.insertContent(summaryHtml);
-      
+
       console.log("Summary appended using editor commands");
     } else {
       // Fallback to state update if editor ref is not available
@@ -63,7 +59,7 @@ function App() {
       const newContent = content ? content + summaryHtml : summaryHtml;
       setContent(newContent);
     }
-    
+
     setSavedMessage("Summary generated and added to document!");
     setTimeout(() => setSavedMessage(""), 3000);
   };
@@ -103,16 +99,16 @@ function App() {
   console.log("Current content state:", content ? content.substring(0, 100) + "..." : "empty");
 
   return (
-    <div style={{ 
-      padding: "20px", 
-      maxWidth: "1200px", 
+    <div style={{
+      padding: "20px",
+      maxWidth: "1200px",
       margin: "0 auto",
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
     }}>
-      <header style={{ 
-        marginBottom: "20px", 
-        display: "flex", 
-        justifyContent: "space-between", 
+      <header style={{
+        marginBottom: "20px",
+        display: "flex",
+        justifyContent: "space-between",
         alignItems: "center",
         flexWrap: "wrap",
         gap: "10px"
@@ -125,9 +121,9 @@ function App() {
             A powerful rich text editor with AI-powered PDF summarization
           </p>
         </div>
-        
+
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <button 
+          <button
             onClick={newDocument}
             style={{
               padding: "8px 16px",
@@ -141,7 +137,7 @@ function App() {
           >
             New
           </button>
-          <button 
+          <button
             onClick={loadDocument}
             style={{
               padding: "8px 16px",
@@ -155,7 +151,7 @@ function App() {
           >
             Load
           </button>
-          <button 
+          <button
             onClick={saveDocument}
             style={{
               padding: "8px 16px",
@@ -195,13 +191,13 @@ function App() {
         backgroundColor: "white",
         overflow: "hidden"
       }}>
-        <SimpleEditor 
+        <SimpleEditor
           ref={editorRef}
-          content={content} 
-          onChange={handleContentChange} 
+          content={content}
+          onChange={handleContentChange}
         />
       </div>
-      
+
       <footer style={{
         marginTop: "20px",
         padding: "16px",
@@ -212,7 +208,7 @@ function App() {
         textAlign: "center"
       }}>
         <p style={{ margin: 0 }}>
-          Click the <strong>Generate</strong> button to upload a PDF and generate an AI summary. 
+          Click the <strong>Generate</strong> button to upload a PDF and generate an AI summary.
           Use the <strong>⚙️ Settings</strong> icon to configure your AI provider and preferences.
         </p>
       </footer>
