@@ -265,11 +265,11 @@ export const SimpleEditor = React.forwardRef<any, SimpleEditorProps>(
     const { from, to } = selection;
 
     if (action === 'replace') {
-      // Replace the selected text
+      // Replace the selected text with parsed HTML content
       editor.chain().focus().deleteRange({ from, to }).insertContent(response).run();
     } else if (action === 'append') {
-      // Move to end of selection and append
-      editor.chain().focus().setTextSelection(to).insertContent(' ' + response).run();
+      // Move to end of selection and append parsed HTML content
+      editor.chain().focus().setTextSelection(to).insertContent('<br/>' + response).run();
     }
   };
 

@@ -65,7 +65,7 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
       setStatus({
         isProcessing: true,
         progress: 50,
-        message: 'Generating summary with AI...'
+        message: 'Generating summary'
       });
 
       // Step 3: Call Tauri command with configured settings

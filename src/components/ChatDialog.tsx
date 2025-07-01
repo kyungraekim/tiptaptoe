@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { loadAISettings, validateAISettings } from '../utils/settingsStorage';
+import { marked } from 'marked';
 
 interface ChatMessage {
   id: string;
@@ -131,7 +132,9 @@ Please respond helpfully about the selected text. Keep responses focused and act
   };
 
   const handleApplyResponse = (message: ChatMessage, action: 'append' | 'replace') => {
-    onApplyResponse(message.content, action);
+    // Parse Markdown to HTML before applying, just like the Generate button does
+    const parsedContent = marked.parse(message.content);
+    onApplyResponse(parsedContent, action);
     onClose();
   };
 
