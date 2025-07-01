@@ -268,8 +268,12 @@ export const SimpleEditor = React.forwardRef<any, SimpleEditorProps>(
       // Replace the selected text with parsed HTML content
       editor.chain().focus().deleteRange({ from, to }).insertContent(response).run();
     } else if (action === 'append') {
-      // Move to end of selection and append parsed HTML content
-      editor.chain().focus().setTextSelection(to).insertContent('<br/>' + response).run();
+      // Find the end of the current paragraph/block that contains the selection
+      const $pos = state.doc.resolve(to);
+      const blockEnd = $pos.end($pos.depth);
+      
+      // Move to end of the current paragraph and append on the next line
+      editor.chain().focus().setTextSelection(blockEnd).insertContent(response).run();
     }
   };
 
