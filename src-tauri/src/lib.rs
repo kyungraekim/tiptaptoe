@@ -7,7 +7,7 @@ mod pdf_processor;
 mod ai_client;
 mod commands;
 
-use commands::{process_pdf_summarization, analyze_pdf, test_ai_connection};
+use commands::{process_pdf_summarization, analyze_pdf, test_ai_connection, process_ai_chat};
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -49,7 +49,8 @@ pub fn run() {
             load_document,
             process_pdf_summarization,
             analyze_pdf,
-            test_ai_connection
+            test_ai_connection,
+            process_ai_chat
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

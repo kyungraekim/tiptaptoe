@@ -47,6 +47,12 @@ pub struct ConnectionTestResponse {
     error: Option<String>,
 }
 
+#[derive(Serialize)]
+pub struct AiChatResponse {
+    response: String,
+    success: bool,
+    error: Option<String>,
+}
 #[tauri::command]
 pub async fn process_pdf_summarization(
     file_path: String,
@@ -191,6 +197,55 @@ pub async fn analyze_pdf(file_path: String) -> Result<PdfAnalysisResponse, Strin
             title: "Unknown".to_string(),
             has_text: false,
             file_size: "Unknown".to_string(),
+            success: false,
+            error: Some(e.to_string()),
+        }),
+    }
+}
+
+#[tauri::command]
+pub async fn process_ai_chat(
+    prompt: String,
+    api_key: String,
+    base_url: Option<String>,
+    model: Option<String>,
+    max_tokens: Option<u32>,
+    temperature: Option<f32>,
+    timeout: Option<u64>,
+) -> Result<AiChatResponse, String> {
+    // Step 1: Validate inputs
+    if api_key.trim().is_empty() || api_key == "your-api-key-here" {
+        return Ok(AiChatResponse { response: String::new(), success: false, error: Some("Please configure a valid API key in settings".to_string()) });
+    }
+
+    if prompt.trim().is_empty() {
+        return Ok(AiChatResponse {
+            response: String::new(),
+            success: false,
+            error: Some("Prompt cannot be empty".to_string()),
+        });
+    }
+
+    // Step 2: Create AI client with provided settings
+    let ai_client = OpenAIClient::new(
+        api_key,
+        base_url,
+        model,
+        max_tokens,
+        temperature,
+        timeout,
+    );
+    
+    // Step 3: Call AI service for chat response
+    // We'll use the existing summarize_text method but with a more generic approach
+    match ai_client.process_chat(&prompt).await {
+        Ok(response) => Ok(AiChatResponse {
+            response,
+            success: true,
+            error: None,
+        }),
+        Err(e) => Ok(AiChatResponse {
+            response: String::new(),
             success: false,
             error: Some(e.to_string()),
         }),

@@ -1,3 +1,4 @@
+// src/components/SimpleEditor.tsx - Updated version with chat integration
 import React, { useRef, useEffect, useState } from 'react';
 import { EditorContent, EditorContext, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -38,6 +39,10 @@ import { TextAlignButton } from './toolbar/TextAlignButton';
 import { UndoRedoButton } from './toolbar/UndoRedoButton';
 import { ThemeToggle } from './toolbar/ThemeToggle';
 
+// New chat components
+import { ChatBubble } from './ChatBubble';
+import { ChatDialog } from './ChatDialog';
+
 // Icons
 import { ArrowLeftIcon, HighlighterIcon, LinkIcon } from './icons';
 
@@ -61,6 +66,7 @@ const defaultContent = `
   <li>Highlighting and links</li>
   <li>Images and blockquotes</li>
   <li>Code blocks and inline code</li>
+  <li><strong>NEW: AI Chat Assistant</strong> - Select text and click the chat icon to get AI help!</li>
 </ul>
 <p>Start typing to see the editor in action!</p>
 `;
@@ -181,6 +187,10 @@ export const SimpleEditor = React.forwardRef<any, SimpleEditorProps>(
   const windowSize = useWindowSize();
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">("main");
   const toolbarRef = useRef<HTMLDivElement>(null);
+  
+  // Chat state
+  const [isChatDialogOpen, setIsChatDialogOpen] = useState(false);
+  const [selectedTextForChat, setSelectedTextForChat] = useState('');
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -241,41 +251,47 @@ export const SimpleEditor = React.forwardRef<any, SimpleEditorProps>(
     overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
   });
 
-  useEffect(() => {
-    if (!isMobile && mobileView !== "main") {
-      setMobileView("main");
-    }
-  }, [isMobile, mobileView]);
+  // Chat handlers
+  const handleChatClick = (selectedText: string) => {
+    setSelectedTextForChat(selectedText);
+    setIsChatDialogOpen(true);
+  };
 
-  // Debug: Log editor creation and destruction
-  useEffect(() => {
-    if (editor) {
-      console.log("Editor initialized with content:", editor.getHTML().substring(0, 100) + "...");
+  const handleApplyResponse = (response: string, action: 'append' | 'replace') => {
+    if (!editor) return;
+
+    const { state } = editor;
+    const { selection } = state;
+    const { from, to } = selection;
+
+    if (action === 'replace') {
+      // Replace the selected text
+      editor.chain().focus().deleteRange({ from, to }).insertContent(response).run();
+    } else if (action === 'append') {
+      // Move to end of selection and append
+      editor.chain().focus().setTextSelection(to).insertContent(' ' + response).run();
     }
-    return () => {
-      if (editor) {
-        console.log("Editor destroyed");
-      }
-    };
-  }, [editor]);
+  };
+
+  if (!editor) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '200px',
+        color: '#6b7280',
+        fontSize: '14px'
+      }}>
+        Loading editor...
+      </div>
+    );
+  }
 
   return (
-    <EditorContext.Provider value={{ editor }}>
-      <div className="simple-editor">
-        <Toolbar
-          ref={toolbarRef}
-          style={
-            isMobile
-              ? {
-                  position: 'fixed',
-                  bottom: `calc(100% - ${windowSize.height - bodyRect.y}px)`,
-                  left: 0,
-                  right: 0,
-                  zIndex: 50,
-                }
-              : {}
-          }
-        >
+    <div className="simple-editor" style={{ position: 'relative' }}>
+      <EditorContext.Provider value={{ editor }}>
+        <Toolbar ref={toolbarRef}>
           {mobileView === "main" ? (
             <MainToolbarContent
               onHighlighterClick={() => setMobileView("highlighter")}
@@ -284,20 +300,32 @@ export const SimpleEditor = React.forwardRef<any, SimpleEditorProps>(
             />
           ) : (
             <MobileToolbarContent
-              type={mobileView === "highlighter" ? "highlighter" : "link"}
+              type={mobileView}
               onBack={() => setMobileView("main")}
             />
           )}
         </Toolbar>
 
-        <div className="content-wrapper">
-          <EditorContent
-            editor={editor}
-            role="presentation"
-            className="simple-editor-content"
+        <div className="content-wrapper" style={{ position: 'relative' }}>
+          <div className="simple-editor-content">
+            <EditorContent editor={editor} />
+          </div>
+          
+          {/* Chat bubble overlay */}
+          <ChatBubble 
+            editor={editor} 
+            onChatClick={handleChatClick}
           />
         </div>
-      </div>
-    </EditorContext.Provider>
+
+        {/* Chat dialog */}
+        <ChatDialog
+          isOpen={isChatDialogOpen}
+          onClose={() => setIsChatDialogOpen(false)}
+          selectedText={selectedTextForChat}
+          onApplyResponse={handleApplyResponse}
+        />
+      </EditorContext.Provider>
+    </div>
   );
 });

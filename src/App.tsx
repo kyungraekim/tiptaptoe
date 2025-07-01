@@ -1,4 +1,4 @@
-// src/App.tsx
+// src/App.tsx - Updated to mention the new chat feature
 import { useState, useRef, useEffect } from "react";
 import { SimpleEditor } from "./components/SimpleEditor";
 import { GenerateButton } from "./components/GenerateButton";
@@ -91,27 +91,24 @@ function App() {
 
   const newDocument = () => {
     setContent("");
-    setSavedMessage("New document created");
-    setTimeout(() => setSavedMessage(""), 2000);
+    setSavedMessage("New document created!");
+    setTimeout(() => setSavedMessage(""), 3000);
   };
-
-  // Debug: Log whenever content state changes
-  console.log("Current content state:", content ? content.substring(0, 100) + "..." : "empty");
 
   return (
     <div style={{
-      padding: "20px",
       maxWidth: "1200px",
       margin: "0 auto",
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+      padding: "20px",
+      fontFamily: "system-ui, -apple-system, sans-serif"
     }}>
       <header style={{
-        marginBottom: "20px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        flexWrap: "wrap",
-        gap: "10px"
+        marginBottom: "20px",
+        padding: "16px 0",
+        borderBottom: "1px solid #e5e7eb"
       }}>
         <div>
           <h1 style={{ margin: "0 0 5px 0", fontSize: "1.875rem", fontWeight: "700" }}>
@@ -208,7 +205,10 @@ function App() {
         textAlign: "center"
       }}>
         <p style={{ margin: 0 }}>
-          Click the <strong>Generate</strong> button to upload a PDF and generate an AI summary.
+          <strong>PDF Summarization:</strong> Click the <strong>Generate</strong> button to upload a PDF and generate an AI summary.
+          <br />
+          <strong>AI Chat Assistant:</strong> Select any text in the editor and click the chat icon to get AI help with your content.
+          <br />
           Use the <strong>⚙️ Settings</strong> icon to configure your AI provider and preferences.
         </p>
       </footer>

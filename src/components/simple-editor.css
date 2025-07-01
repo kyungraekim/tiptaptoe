@@ -1,4 +1,4 @@
-/* src/components/simple-editor.css */
+/* src/components/simple-editor.css - Original styles with minimal chat additions */
 .simple-editor {
     position: relative;
     display: flex;
@@ -416,4 +416,102 @@
 .simple-editor .tiptap-toolbar {
     position: relative;
     z-index: 2; /* Higher than content but lower than dropdowns */
+}
+
+/* ===== CHAT FEATURE STYLES (MINIMAL ADDITIONS) ===== */
+
+/* Chat bubble styles */
+.chat-bubble {
+    animation: chatBubbleAppear 0.2s ease-out;
+    z-index: 100;
+}
+
+@keyframes chatBubbleAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Chat dialog styles */
+.chat-dialog-overlay {
+    animation: fadeIn 0.2s ease-out;
+    z-index: 2000;
+}
+
+.chat-dialog {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes slideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Dark mode support for chat components */
+.dark .chat-dialog {
+    background-color: hsl(222.2 84% 4.9%);
+    color: hsl(210 40% 98%);
+}
+
+.dark .chat-dialog h3 {
+    color: hsl(210 40% 98%);
+}
+
+.dark .chat-dialog input {
+    background-color: hsl(217.2 32.6% 17.5%);
+    border-color: hsl(217.2 32.6% 25%);
+    color: hsl(210 40% 98%);
+}
+
+.dark .chat-dialog input::placeholder {
+    color: hsl(215.4 16.3% 56.9%);
+}
+
+.dark .chat-bubble {
+    background-color: hsl(213.1 93.9% 67.8%);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .chat-bubble:hover {
+    background-color: hsl(213.1 93.9% 75%);
+}
+
+/* Mobile responsive adjustments for chat */
+@media (max-width: 640px) {
+    .chat-dialog {
+        width: 95%;
+        height: 90%;
+        margin: 20px;
+    }
+    
+    .chat-bubble {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
 }

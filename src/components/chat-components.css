@@ -1,0 +1,150 @@
+/* src/components/chat-components.css */
+
+/* Chat bubble styles */
+.chat-bubble {
+    animation: chatBubbleAppear 0.2s ease-out;
+  }
+  
+  @keyframes chatBubbleAppear {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(5px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  
+  .chat-bubble:hover {
+    animation: chatBubblePulse 0.3s ease-in-out;
+  }
+  
+  @keyframes chatBubblePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  /* Chat dialog styles */
+  .chat-dialog-overlay {
+    animation: fadeIn 0.2s ease-out;
+  }
+  
+  .chat-dialog {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Loading spinner animation */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading-spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Message animations */
+  .chat-message {
+    animation: messageSlide 0.3s ease-out;
+  }
+  
+  @keyframes messageSlide {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Dark mode support for chat components */
+  .dark .chat-dialog {
+    background-color: hsl(222.2 84% 4.9%);
+    color: hsl(210 40% 98%);
+  }
+  
+  .dark .chat-dialog h3 {
+    color: hsl(210 40% 98%);
+  }
+  
+  .dark .chat-dialog input {
+    background-color: hsl(217.2 32.6% 17.5%);
+    border-color: hsl(217.2 32.6% 25%);
+    color: hsl(210 40% 98%);
+  }
+  
+  .dark .chat-dialog input::placeholder {
+    color: hsl(215.4 16.3% 56.9%);
+  }
+  
+  .dark .chat-dialog .message-assistant {
+    background-color: hsl(217.2 32.6% 17.5%);
+    color: hsl(210 40% 98%);
+  }
+  
+  .dark .chat-bubble {
+    background-color: hsl(213.1 93.9% 67.8%);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .dark .chat-bubble:hover {
+    background-color: hsl(213.1 93.9% 75%);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .chat-dialog {
+      width: 95%;
+      height: 90%;
+      margin: 20px;
+    }
+    
+    .chat-bubble {
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+  }
+  
+  /* Ensure chat components have proper z-index layering */
+  .simple-editor .content-wrapper {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .chat-bubble {
+    z-index: 100;
+  }
+  
+  .chat-dialog-overlay {
+    z-index: 2000;
+  }
+  
+  /* Improve text selection visibility when chat bubble is present */
+  .simple-editor-content .ProseMirror ::selection {
+    background-color: rgba(59, 130, 246, 0.3);
+  }
+  
+  .simple-editor-content .ProseMirror ::-moz-selection {
+    background-color: rgba(59, 130, 246, 0.3);
+  }
+  
