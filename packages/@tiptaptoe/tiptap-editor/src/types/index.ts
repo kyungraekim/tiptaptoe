@@ -43,7 +43,7 @@ export type ToolbarConfig = (ToolbarGroupConfig | ToolbarSeparatorConfig | Toolb
 
 // Editor configuration
 export interface TiptapEditorConfig {
-  extensions?: Extension[];
+  extensions?: any[];
   content?: string;
   placeholder?: string;
   editable?: boolean;
@@ -64,7 +64,7 @@ export interface EditorPlugin {
   name: string;
   component?: React.ComponentType<{ editor: Editor }>;
   toolbar?: ToolbarItemConfig[];
-  extensions?: Extension[];
+  extensions?: any[];
 }
 
 // Props for the main editor component
