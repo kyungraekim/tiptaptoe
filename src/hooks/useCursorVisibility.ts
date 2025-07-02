@@ -4,10 +4,9 @@ import { Editor } from '@tiptap/react';
 
 interface UseCursorVisibilityProps {
   editor: Editor | null;
-  overlayHeight: number;
 }
 
-export const useCursorVisibility = ({ editor, overlayHeight }: UseCursorVisibilityProps) => {
+export const useCursorVisibility = ({ editor }: UseCursorVisibilityProps) => {
   const [bodyRect, setBodyRect] = useState({ y: 0 });
 
   useEffect(() => {

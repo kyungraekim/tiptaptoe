@@ -43,7 +43,6 @@ struct OpenAIErrorDetails {
     message: String,
     #[serde(rename = "type")]
     error_type: Option<String>,
-    code: Option<String>,
 }
 
 pub struct OpenAIClient {

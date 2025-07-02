@@ -30,7 +30,7 @@ export const HeadingDropdownMenu: React.FC<HeadingDropdownMenuProps> = ({ levels
     if (level === null) {
       editor.chain().focus().setParagraph().run();
     } else {
-      editor.chain().focus().toggleHeading({ level }).run();
+      editor.chain().focus().toggleHeading({ level: level as any }).run();
     }
   };
 

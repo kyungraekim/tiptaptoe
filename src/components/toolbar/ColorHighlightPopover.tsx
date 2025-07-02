@@ -41,7 +41,7 @@ export const ColorHighlightPopover: React.FC = () => {
 };
 
 export const ColorHighlightPopoverContent: React.FC = () => {
-    const { editor } = useEditorState();
+    const { editor } = useCurrentEditor();
 
     if (!editor) return null;
 
@@ -79,7 +79,7 @@ export const ColorHighlightPopoverContent: React.FC = () => {
 };
 
 export const ColorHighlightPopoverButton: React.FC<{ onClick: () => void; }> = ({ onClick }) => {
-    const { editor } = useEditorState();
+    const { editor } = useCurrentEditor();
 
     if (!editor) return null;
 

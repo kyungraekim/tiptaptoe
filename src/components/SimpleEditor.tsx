@@ -22,7 +22,7 @@ import { Toolbar, ToolbarGroup, ToolbarSeparator } from './ui/Toolbar';
 import { HeadingDropdownMenu } from './toolbar/HeadingDropdownMenu';
 import { ImageUploadButton } from './toolbar/ImageUploadButton';
 import { ListDropdownMenu } from './toolbar/ListDropdownMenu';
-import { BlockquoteButton } from './toolbar/BlockquoteButton';
+import { BlockquoteButton } from './toolbar/BlockQuoteButton';
 import { CodeBlockButton } from './toolbar/CodeBlockButton';
 import {
   ColorHighlightPopover,
@@ -48,7 +48,6 @@ import { ArrowLeftIcon, HighlighterIcon, LinkIcon } from './icons';
 
 // Hooks
 import { useMobile } from '../hooks/useMobile';
-import { useWindowSize } from '../hooks/useWindowSize';
 import { useCursorVisibility } from '../hooks/useCursorVisibility';
 
 // Styles
@@ -184,7 +183,6 @@ interface SimpleEditorProps {
 export const SimpleEditor = React.forwardRef<any, SimpleEditorProps>(
   ({ content, onChange }, ref) => {
   const isMobile = useMobile();
-  const windowSize = useWindowSize();
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">("main");
   const toolbarRef = useRef<HTMLDivElement>(null);
   
@@ -246,9 +244,8 @@ export const SimpleEditor = React.forwardRef<any, SimpleEditorProps>(
     }
   }, [editor, content]);
 
-  const bodyRect = useCursorVisibility({
+  useCursorVisibility({
     editor,
-    overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
   });
 
   // Chat handlers

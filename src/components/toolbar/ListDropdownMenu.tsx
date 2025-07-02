@@ -16,13 +16,6 @@ export const ListDropdownMenu: React.FC<ListDropdownMenuProps> = ({ types }) => 
 
   if (!editor) return null;
 
-  const getCurrentList = () => {
-    if (editor.isActive('bulletList')) return 'Bullet List';
-    if (editor.isActive('orderedList')) return 'Numbered List';
-    if (editor.isActive('taskList')) return 'Task List';
-    return 'List';
-  };
-
   const toggleList = (type: ListType) => {
     switch (type) {
       case 'bulletList':

@@ -131,9 +131,9 @@ Please respond helpfully about the selected text. Keep responses focused and act
     }
   };
 
-  const handleApplyResponse = (message: ChatMessage, action: 'append' | 'replace') => {
+  const handleApplyResponse = async (message: ChatMessage, action: 'append' | 'replace') => {
     // Parse Markdown to HTML before applying, just like the Generate button does
-    const parsedContent = marked.parse(message.content);
+    const parsedContent = await marked.parse(message.content);
     onApplyResponse(parsedContent, action);
     onClose();
   };

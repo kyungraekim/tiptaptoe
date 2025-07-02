@@ -45,7 +45,6 @@ export async function testAIConnection(settings: AISettings): Promise<{ success:
   try {
     // Test the AI connection by making a simple request
     const testPrompt = "Say 'Hello' if you can hear me.";
-    const testText = "This is a test message.";
     
     const response = await invoke('process_pdf_summarization', {
       filePath: '', // Empty for test

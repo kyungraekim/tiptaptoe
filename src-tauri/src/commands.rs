@@ -1,7 +1,6 @@
 // src-tauri/src/commands.rs
 use crate::ai_client::OpenAIClient;
-use crate::pdf_processor::{PdfProcessor, PdfInfo};
-use crate::errors::AppError;
+use crate::pdf_processor::PdfProcessor;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]

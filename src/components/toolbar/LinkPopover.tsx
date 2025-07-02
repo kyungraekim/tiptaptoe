@@ -88,7 +88,7 @@ export const LinkContent: React.FC<{
 };
 
 export const LinkButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
-  const { editor } = useEditorState();
+  const { editor } = useCurrentEditor();
 
   if (!editor) return null;
 
