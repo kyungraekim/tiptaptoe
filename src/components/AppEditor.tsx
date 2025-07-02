@@ -55,7 +55,7 @@ export const AppEditor = React.forwardRef<any, AppEditorProps>(
         Superscript,
         Subscript,
         Link.configure({ openOnClick: false }),
-      ] as any,
+      ],
       content: content || DEFAULT_CONTENT,
       plugins: [chatPlugin],
     };
