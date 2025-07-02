@@ -1,0 +1,294 @@
+/* Button styles */
+.tiptap-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    color: inherit;
+    min-height: 2rem;
+    padding: 0 0.75rem;
+}
+
+.tiptap-button[data-size="sm"] {
+    min-height: 1.75rem;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+}
+
+.tiptap-button[data-size="lg"] {
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    font-size: 1rem;
+}
+
+.tiptap-button[data-style="default"] {
+    background: hsl(210 40% 98%);
+    border-color: hsl(210 40% 80%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+.tiptap-button[data-style="default"]:hover {
+    background: hsl(210 40% 96%);
+    border-color: hsl(210 40% 70%);
+}
+
+.tiptap-button[data-style="ghost"]:hover {
+    background: hsl(210 40% 98%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+.tiptap-button[data-style="outline"] {
+    border-color: hsl(214.3 31.8% 91.4%);
+    background: transparent;
+}
+
+.tiptap-button[data-style="outline"]:hover {
+    background: hsl(210 40% 98%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+.tiptap-button[data-state="active"] {
+    background: hsl(210 40% 92%);
+    color: hsl(222.2 84% 4.9%);
+    border-color: hsl(210 40% 80%);
+}
+
+.tiptap-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tiptap-button-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Toolbar styles */
+.tiptap-toolbar {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    background: hsl(0 0% 100%);
+    border-bottom: 1px solid hsl(214.3 31.8% 91.4%);
+    border-radius: 0.5rem 0.5rem 0 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.tiptap-toolbar::-webkit-scrollbar {
+    display: none;
+}
+
+.tiptap-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    position: relative;
+    z-index: 101;
+}
+
+.tiptap-toolbar-separator {
+    width: 1px;
+    height: 1.5rem;
+    background: hsl(214.3 31.8% 91.4%);
+    margin: 0 0.25rem;
+}
+
+/* Dropdown styles */
+.tiptap-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.tiptap-dropdown-content {
+    position: fixed;
+    z-index: 99999 !important;
+    min-width: 8rem;
+    background: hsl(0 0% 100%);
+    border: 1px solid hsl(214.3 31.8% 91.4%);
+    border-radius: 0.375rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    padding: 0.25rem;
+    max-height: 300px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+}
+
+.tiptap-dropdown-content[style*="opacity: 1"] {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+.tiptap-dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    color: inherit;
+    white-space: nowrap;
+}
+
+.tiptap-dropdown-item:hover {
+    background: hsl(210 40% 98%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+.tiptap-dropdown-item[data-state="active"] {
+    background: hsl(210 40% 92%);
+    color: hsl(222.2 84% 4.9%);
+    font-weight: 500;
+}
+
+.tiptap-dropdown-item:focus {
+    outline: none;
+    background: hsl(210 40% 98%);
+    color: hsl(222.2 84% 4.9%);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .tiptap-button[data-style="default"] {
+        background: hsl(222.2 84% 4.9%);
+        border-color: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+
+    .tiptap-button[data-style="default"]:hover {
+        background: hsl(217.2 32.6% 17.5%);
+        border-color: hsl(217.2 32.6% 25%);
+    }
+
+    .tiptap-button[data-style="ghost"]:hover {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+
+    .tiptap-button[data-style="outline"] {
+        border-color: hsl(217.2 32.6% 17.5%);
+    }
+
+    .tiptap-button[data-style="outline"]:hover {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+
+    .tiptap-button[data-state="active"] {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+        border-color: hsl(217.2 32.6% 25%);
+    }
+
+    .tiptap-toolbar {
+        background: hsl(222.2 84% 4.9%);
+        border-bottom-color: hsl(217.2 32.6% 17.5%);
+    }
+
+    .tiptap-toolbar-separator {
+        background: hsl(217.2 32.6% 17.5%);
+    }
+
+    .tiptap-dropdown-content {
+        background: hsl(222.2 84% 4.9%);
+        border-color: hsl(217.2 32.6% 17.5%);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .tiptap-dropdown-item:hover {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+
+    .tiptap-dropdown-item[data-state="active"] {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+
+    .tiptap-dropdown-item:focus {
+        background: hsl(217.2 32.6% 17.5%);
+        color: hsl(210 40% 98%);
+    }
+}
+
+/* Dark mode class-based (for theme toggle) */
+.dark .tiptap-button[data-style="default"] {
+    background: hsl(222.2 84% 4.9%);
+    border-color: hsl(217.2 32.6% 17.5%);
+    color: hsl(210 40% 98%);
+}
+
+.dark .tiptap-button[data-style="default"]:hover {
+    background: hsl(217.2 32.6% 17.5%);
+    border-color: hsl(217.2 32.6% 25%);
+}
+
+.dark .tiptap-button[data-style="ghost"]:hover {
+    background: hsl(217.2 32.6% 17.5%);
+    color: hsl(210 40% 98%);
+}
+
+.dark .tiptap-button[data-style="outline"] {
+    border-color: hsl(217.2 32.6% 17.5%);
+}
+
+.dark .tiptap-button[data-style="outline"]:hover {
+    background: hsl(217.2 32.6% 17.5%);
+    color: hsl(210 40% 98%);
+}
+
+.dark .tiptap-button[data-state="active"] {
+    background: hsl(217.2 32.6% 17.5%);
+    color: hsl(210 40% 98%);
+    border-color: hsl(217.2 32.6% 25%);
+}
+
+.dark .tiptap-toolbar {
+    background: hsl(222.2 84% 4.9%);
+    border-bottom-color: hsl(217.2 32.6% 17.5%);
+}
+
+.dark .tiptap-toolbar-separator {
+    background: hsl(217.2 32.6% 17.5%);
+}
+
+.dark .tiptap-dropdown-content {
+    background: hsl(222.2 84% 4.9%);
+    border-color: hsl(217.2 32.6% 17.5%);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.dark .tiptap-dropdown-item:hover {
+    background: hsl(217.2 32.6% 17.5%);
+    color: hsl(210 40% 98%);
+}
+
+.dark .tiptap-dropdown-item[data-state="active"] {
+    background: hsl(217.2 32.6% 17.5%);
+    color: hsl(210 40% 98%);
+}
+
+.dark .tiptap-dropdown-item:focus {
+    background: hsl(217.2 32.6% 17.5%);
+    color: hsl(210 40% 98%);
+}

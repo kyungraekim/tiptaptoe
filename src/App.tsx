@@ -1,6 +1,6 @@
 // src/App.tsx - Updated to mention the new chat feature
 import { useState, useRef, useEffect } from "react";
-import { SimpleEditor } from "./components/SimpleEditor";
+import { AppEditor } from "./components/AppEditor";
 import { GenerateButton } from "./components/GenerateButton";
 import { SettingsIcon } from "./components/SettingsIcon";
 import { invoke } from "@tauri-apps/api/core";
@@ -188,7 +188,7 @@ function App() {
         backgroundColor: "white",
         overflow: "hidden"
       }}>
-        <SimpleEditor
+        <AppEditor
           ref={editorRef}
           content={content}
           onChange={handleContentChange}

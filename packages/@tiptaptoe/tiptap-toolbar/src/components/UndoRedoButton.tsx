@@ -1,4 +1,4 @@
-// src/components/toolbar/UndoRedoButton.tsx
+// packages/@tiptaptoe/tiptap-toolbar/src/components/UndoRedoButton.tsx
 import React from 'react';
 import { useCurrentEditor } from '@tiptap/react';
 import { Button, UndoIcon, RedoIcon } from '@tiptaptoe/ui-components';
@@ -12,14 +12,14 @@ export const UndoRedoButton: React.FC<UndoRedoButtonProps> = ({ action }) => {
 
   if (!editor) return null;
 
-  const canPerform = action === 'undo' ? editor.can().undo() : editor.can().redo();
+  const canPerform = action === 'undo' ? (editor.can() as any).undo() : (editor.can() as any).redo();
   const Icon = action === 'undo' ? UndoIcon : RedoIcon;
 
   const handleClick = () => {
     if (action === 'undo') {
-      editor.chain().focus().undo().run();
+      (editor.chain().focus() as any).undo().run();
     } else {
-      editor.chain().focus().redo().run();
+      (editor.chain().focus() as any).redo().run();
     }
   };
 

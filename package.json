@@ -28,6 +28,9 @@
     "@tiptap/pm": "^2.23.0",
     "@tiptap/react": "^2.23.0",
     "@tiptap/starter-kit": "^2.23.0",
+    "@tiptaptoe/ui-components": "file:./packages/@tiptaptoe/ui-components",
+    "@tiptaptoe/tiptap-toolbar": "file:./packages/@tiptaptoe/tiptap-toolbar",
+    "@tiptaptoe/tiptap-editor": "file:./packages/@tiptaptoe/tiptap-editor",
     "marked": "^16.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

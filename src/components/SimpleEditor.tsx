@@ -14,41 +14,37 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 
 // UI Components
-import { Button } from './ui/Button';
-import { Spacer } from './ui/Spacer';
-import { Toolbar, ToolbarGroup, ToolbarSeparator } from './ui/Toolbar';
+import { Button, Spacer, Toolbar, ToolbarGroup, ToolbarSeparator } from '@tiptaptoe/ui-components';
 
 // Toolbar Components
-import { HeadingDropdownMenu } from './toolbar/HeadingDropdownMenu';
-import { ImageUploadButton } from './toolbar/ImageUploadButton';
-import { ListDropdownMenu } from './toolbar/ListDropdownMenu';
-import { BlockquoteButton } from './toolbar/BlockQuoteButton';
-import { CodeBlockButton } from './toolbar/CodeBlockButton';
 import {
+  HeadingDropdownMenu,
+  ImageUploadButton,
+  ListDropdownMenu,
+  BlockquoteButton,
+  CodeBlockButton,
   ColorHighlightPopover,
   ColorHighlightPopoverContent,
   ColorHighlightPopoverButton,
-} from './toolbar/ColorHighlightPopover';
-import {
   LinkPopover,
   LinkContent,
   LinkButton,
-} from './toolbar/LinkPopover';
-import { MarkButton } from './toolbar/MarkButton';
-import { TextAlignButton } from './toolbar/TextAlignButton';
-import { UndoRedoButton } from './toolbar/UndoRedoButton';
-import { ThemeToggle } from './toolbar/ThemeToggle';
+  MarkButton,
+  TextAlignButton,
+  UndoRedoButton,
+  ThemeToggle,
+  useCursorVisibility,
+} from '@tiptaptoe/tiptap-toolbar';
 
 // New chat components
 import { ChatBubble } from './ChatBubble';
 import { ChatDialog } from './ChatDialog';
 
 // Icons
-import { ArrowLeftIcon, HighlighterIcon, LinkIcon } from './icons';
+import { ArrowLeftIcon, HighlighterIcon, LinkIcon } from '@tiptaptoe/ui-components';
 
 // Hooks
-import { useMobile } from '../hooks/useMobile';
-import { useCursorVisibility } from '../hooks/useCursorVisibility';
+import { useMobile } from '@tiptaptoe/ui-components';
 
 // Styles
 import './simple-editor.css';

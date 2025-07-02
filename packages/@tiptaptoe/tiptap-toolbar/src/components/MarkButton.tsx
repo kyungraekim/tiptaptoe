@@ -1,4 +1,4 @@
-// src/components/toolbar/MarkButton.tsx
+// packages/@tiptaptoe/tiptap-toolbar/src/components/MarkButton.tsx
 import React from 'react';
 import { useCurrentEditor } from '@tiptap/react';
 import { 
@@ -39,25 +39,25 @@ export const MarkButton: React.FC<MarkButtonProps> = ({ type }) => {
   const handleClick = () => {
     switch (type) {
       case 'bold':
-        editor.chain().focus().toggleBold().run();
+        (editor.chain().focus() as any).toggleBold().run();
         break;
       case 'italic':
-        editor.chain().focus().toggleItalic().run();
+        (editor.chain().focus() as any).toggleItalic().run();
         break;
       case 'underline':
-        editor.chain().focus().toggleUnderline().run();
+        (editor.chain().focus() as any).toggleUnderline().run();
         break;
       case 'strike':
-        editor.chain().focus().toggleStrike().run();
+        (editor.chain().focus() as any).toggleStrike().run();
         break;
       case 'code':
-        editor.chain().focus().toggleCode().run();
+        (editor.chain().focus() as any).toggleCode().run();
         break;
       case 'superscript':
-        editor.chain().focus().toggleSuperscript().run();
+        (editor.chain().focus() as any).toggleSuperscript().run();
         break;
       case 'subscript':
-        editor.chain().focus().toggleSubscript().run();
+        (editor.chain().focus() as any).toggleSubscript().run();
         break;
     }
   };
