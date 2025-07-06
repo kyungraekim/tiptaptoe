@@ -2,13 +2,20 @@ use crate::errors::AppError;
 use crate::llm::claude::ClaudeClient;
 use crate::llm::openai::OpenAIClient;
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 
 pub mod claude;
 pub mod openai;
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ReasoningResponse {
+    pub reasoning: Option<String>,
+    pub output: String,
+}
+
 #[async_trait]
 pub trait LLMClient: Send + Sync {
-    async fn chat(&self, prompt: &str) -> Result<String, AppError>;
+    async fn chat(&self, prompt: &str) -> Result<ReasoningResponse, AppError>;
     async fn summarize(&self, text: &str, prompt: &str) -> Result<String, AppError>;
     async fn test_connection(&self) -> Result<String, AppError>;
 }
@@ -20,7 +27,7 @@ pub enum LlmClient {
 
 #[async_trait]
 impl LLMClient for LlmClient {
-    async fn chat(&self, prompt: &str) -> Result<String, AppError> {
+    async fn chat(&self, prompt: &str) -> Result<ReasoningResponse, AppError> {
         match self {
             LlmClient::OpenAi(client) => client.chat(prompt).await,
             LlmClient::Claude(client) => client.chat(prompt).await,

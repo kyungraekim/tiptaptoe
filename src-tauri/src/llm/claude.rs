@@ -1,6 +1,6 @@
 // src-tauri/src/llm/claude.rs
 use crate::errors::AppError;
-use crate::llm::LLMClient;
+use crate::llm::{LLMClient, ReasoningResponse};
 use async_trait::async_trait;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -99,7 +99,7 @@ impl ClaudeClient {
 
 #[async_trait]
 impl LLMClient for ClaudeClient {
-    async fn chat(&self, prompt: &str) -> Result<String, AppError> {
+    async fn chat(&self, prompt: &str) -> Result<ReasoningResponse, AppError> {
         if prompt.trim().is_empty() {
             return Err(AppError::AiError("No prompt provided for chat".to_string()));
         }
@@ -136,7 +136,10 @@ impl LLMClient for ClaudeClient {
             .map_err(|e| AppError::AiError(format!("Failed to parse API response: {}", e)))?;
 
         if let Some(content) = api_response.content.into_iter().find(|c| c.content_type == "text") {
-            Ok(content.text.trim().to_string())
+            Ok(ReasoningResponse {
+                reasoning: None,
+                output: content.text.trim().to_string(),
+            })
         } else {
             Err(AppError::AiError("No text content in response".to_string()))
         }
@@ -158,11 +161,11 @@ impl LLMClient for ClaudeClient {
         };
 
         let full_prompt = format!("{}\n\nDocument content:\n{}", prompt, truncated_text);
-        self.chat(&full_prompt).await
+        self.chat(&full_prompt).await.map(|r| r.output)
     }
 
     async fn test_connection(&self) -> Result<String, AppError> {
         let test_prompt = "Say 'Connection test successful' if you can hear me.";
-        self.chat(test_prompt).await
+        self.chat(test_prompt).await.map(|r| r.output)
     }
 }

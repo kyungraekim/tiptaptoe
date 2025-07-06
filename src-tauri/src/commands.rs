@@ -2,10 +2,10 @@
 use crate::errors::AppError;
 use crate::llm::claude::ClaudeClient;
 use crate::llm::openai::OpenAIClient;
-use crate::llm::{LlmClient, LLMClient};
+use crate::llm::{LlmClient, ReasoningResponse, LLMClient};
 use crate::pdf_processor::PdfProcessor;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+
 
 // Helper function to create the correct LLM client based on settings
 fn get_llm_client(
@@ -82,9 +82,23 @@ pub struct ConnectionTestResponse {
     error: Option<String>,
 }
 
+#[derive(Deserialize)]
+pub struct AiChatRequest {
+    prompt: String,
+    #[serde(rename = "apiKey")]
+    api_key: String,
+    #[serde(rename = "baseUrl")]
+    base_url: Option<String>,
+    model: Option<String>,
+    #[serde(rename = "maxTokens")]
+    max_tokens: Option<u32>,
+    temperature: Option<f32>,
+    timeout: Option<u64>,
+}
+
 #[derive(Serialize)]
 pub struct AiChatResponse {
-    response: String,
+    response: Option<ReasoningResponse>,
     success: bool,
     error: Option<String>,
 }
@@ -244,33 +258,38 @@ pub async fn analyze_pdf(file_path: String) -> Result<PdfAnalysisResponse, Strin
 
 #[tauri::command]
 pub async fn process_ai_chat(
-    prompt: String,
-    api_key: String,
-    base_url: Option<String>,
-    model: Option<String>,
-    max_tokens: Option<u32>,
-    temperature: Option<f32>,
-    timeout: Option<u64>,
+    chat_request: AiChatRequest,
 ) -> Result<AiChatResponse, String> {
     // Step 1: Validate inputs
-    if api_key.trim().is_empty() || api_key == "your-api-key-here" {
-        return Ok(AiChatResponse { response: String::new(), success: false, error: Some("Please configure a valid API key in settings".to_string()) });
+    if chat_request.api_key.trim().is_empty() || chat_request.api_key == "your-api-key-here" {
+        return Ok(AiChatResponse {
+            response: None,
+            success: false,
+            error: Some("Please configure a valid API key in settings".to_string()),
+        });
     }
 
-    if prompt.trim().is_empty() {
+    if chat_request.prompt.trim().is_empty() {
         return Ok(AiChatResponse {
-            response: String::new(),
+            response: None,
             success: false,
             error: Some("Prompt cannot be empty".to_string()),
         });
     }
 
     // Step 2: Create AI client with provided settings
-    let ai_client = match get_llm_client(api_key, base_url, model, max_tokens, temperature, timeout) {
+    let ai_client = match get_llm_client(
+        chat_request.api_key,
+        chat_request.base_url,
+        chat_request.model,
+        chat_request.max_tokens,
+        chat_request.temperature,
+        chat_request.timeout,
+    ) {
         Ok(client) => client,
         Err(e) => {
             return Ok(AiChatResponse {
-                response: String::new(),
+                response: None,
                 success: false,
                 error: Some(e.to_string()),
             });
@@ -278,14 +297,14 @@ pub async fn process_ai_chat(
     };
 
     // Step 3: Call AI service for chat response
-    match ai_client.chat(&prompt).await {
+    match ai_client.chat(&chat_request.prompt).await {
         Ok(response) => Ok(AiChatResponse {
-            response,
+            response: Some(response),
             success: true,
             error: None,
         }),
         Err(e) => Ok(AiChatResponse {
-            response: String::new(),
+            response: None,
             success: false,
             error: Some(e.to_string()),
         }),

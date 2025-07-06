@@ -1,6 +1,6 @@
 // src-tauri/src/llm/openai.rs
 use crate::errors::AppError;
-use crate::llm::LLMClient;
+use crate::llm::{LLMClient, ReasoningResponse};
 use async_trait::async_trait;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -94,7 +94,7 @@ impl OpenAIClient {
 
 #[async_trait]
 impl LLMClient for OpenAIClient {
-    async fn chat(&self, prompt: &str) -> Result<String, AppError> {
+    async fn chat(&self, prompt: &str) -> Result<ReasoningResponse, AppError> {
         if prompt.trim().is_empty() {
             return Err(AppError::AiError("No prompt provided for chat".to_string()));
         }
@@ -181,15 +181,21 @@ impl LLMClient for OpenAIClient {
             return Err(AppError::AiError("No response from AI service".to_string()));
         }
 
-        let chat_response = api_response.choices[0].message.content.trim().to_string();
+        if let Some(choice) = api_response.choices.into_iter().next() {
+            let chat_response = choice.message.content.trim().to_string();
+            if chat_response.is_empty() {
+                return Err(AppError::AiError(
+                    "AI service returned empty response".to_string(),
+                ));
+            }
 
-        if chat_response.is_empty() {
-            return Err(AppError::AiError(
-                "AI service returned empty response".to_string(),
-            ));
+            Ok(ReasoningResponse {
+                reasoning: None,
+                output: chat_response,
+            })
+        } else {
+            Err(AppError::AiError("No response from AI service".to_string()))
         }
-
-        Ok(chat_response)
     }
 
     async fn summarize(&self, text: &str, prompt: &str) -> Result<String, AppError> {
@@ -212,11 +218,11 @@ impl LLMClient for OpenAIClient {
 
         let full_prompt = format!("{}\n\nDocument content:\n{}", prompt, truncated_text);
 
-        self.chat(&full_prompt).await
+        self.chat(&full_prompt).await.map(|r| r.output)
     }
 
     async fn test_connection(&self) -> Result<String, AppError> {
         let test_prompt = "Say 'Connection test successful' if you can hear me.";
-        self.chat(test_prompt).await
+        self.chat(test_prompt).await.map(|r| r.output)
     }
 }

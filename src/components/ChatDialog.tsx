@@ -96,20 +96,24 @@ Please respond helpfully about the selected text. Keep responses focused and act
 
       // Call the AI service using existing infrastructure
       const response = await invoke<any>('process_ai_chat', {
-        prompt: conversationContext,
-        apiKey: settings.apiKey,
-        baseUrl: settings.baseUrl,
-        model: settings.model,
-        maxTokens: settings.maxTokens,
-        temperature: settings.temperature,
-        timeout: settings.timeout
+        chatRequest: {
+          prompt: conversationContext,
+          apiKey: settings.apiKey,
+          baseUrl: settings.baseUrl,
+          model: settings.model,
+          maxTokens: settings.maxTokens,
+          temperature: settings.temperature,
+          timeout: settings.timeout
+        }
       });
 
       if (response.success) {
         const assistantMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: response.response,
+          content: typeof response.response === 'object' && response.response !== null
+            ? response.response.output
+            : response.response,
           timestamp: new Date()
         };
         setMessages(prev => [...prev, assistantMessage]);
