@@ -1,5 +1,6 @@
 // src-tauri/src/llm/claude.rs
 use crate::errors::AppError;
+use super::reasoning::extract_reasoning_and_output;
 use crate::llm::{LLMClient, ReasoningResponse};
 use async_trait::async_trait;
 use reqwest::Client;
@@ -136,9 +137,10 @@ impl LLMClient for ClaudeClient {
             .map_err(|e| AppError::AiError(format!("Failed to parse API response: {}", e)))?;
 
         if let Some(content) = api_response.content.into_iter().find(|c| c.content_type == "text") {
+            let (reasoning, output) = extract_reasoning_and_output(&content.text);
             Ok(ReasoningResponse {
-                reasoning: None,
-                output: content.text.trim().to_string(),
+                reasoning,
+                output,
             })
         } else {
             Err(AppError::AiError("No text content in response".to_string()))

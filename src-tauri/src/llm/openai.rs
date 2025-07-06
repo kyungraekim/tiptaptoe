@@ -1,5 +1,6 @@
 // src-tauri/src/llm/openai.rs
 use crate::errors::AppError;
+use super::reasoning::extract_reasoning_and_output;
 use crate::llm::{LLMClient, ReasoningResponse};
 use async_trait::async_trait;
 use reqwest::Client;
@@ -188,10 +189,10 @@ impl LLMClient for OpenAIClient {
                     "AI service returned empty response".to_string(),
                 ));
             }
-
+            let (reasoning, output) = extract_reasoning_and_output(&chat_response);
             Ok(ReasoningResponse {
-                reasoning: None,
-                output: chat_response,
+                reasoning,
+                output,
             })
         } else {
             Err(AppError::AiError("No response from AI service".to_string()))

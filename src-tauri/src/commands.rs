@@ -298,11 +298,17 @@ pub async fn process_ai_chat(
 
     // Step 3: Call AI service for chat response
     match ai_client.chat(&chat_request.prompt).await {
-        Ok(response) => Ok(AiChatResponse {
-            response: Some(response),
-            success: true,
-            error: None,
-        }),
+        Ok(mut response) => {
+            // For now, we don't want to show the reasoning text to the user.
+            // It's still parsed for potential future use, but cleared before sending to the frontend.
+            response.reasoning = None;
+
+            Ok(AiChatResponse {
+                response: Some(response),
+                success: true,
+                error: None,
+            })
+        }
         Err(e) => Ok(AiChatResponse {
             response: None,
             success: false,

@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod claude;
 pub mod openai;
+pub mod reasoning;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReasoningResponse {
