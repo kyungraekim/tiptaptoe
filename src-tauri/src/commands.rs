@@ -1,7 +1,43 @@
 // src-tauri/src/commands.rs
-use crate::ai_client::OpenAIClient;
+use crate::errors::AppError;
+use crate::llm::claude::ClaudeClient;
+use crate::llm::openai::OpenAIClient;
+use crate::llm::{LlmClient, LLMClient};
 use crate::pdf_processor::PdfProcessor;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+
+// Helper function to create the correct LLM client based on settings
+fn get_llm_client(
+    api_key: String,
+    base_url: Option<String>,
+    model: Option<String>,
+    max_tokens: Option<u32>,
+    temperature: Option<f32>,
+    timeout: Option<u64>,
+) -> Result<LlmClient, AppError> {
+    let url_for_check = base_url.clone().unwrap_or_else(|| "https://api.openai.com/v1".to_string());
+
+    // Determine provider based on the base URL provided in settings
+    if url_for_check.contains("api.openai.com")
+        || url_for_check.contains("api.together.xyz")
+        || url_for_check.contains("api.deepseek.com")
+        || url_for_check.contains("localhost:1234") // For LM Studio
+        || url_for_check.contains("localhost:11434")
+    {
+        // All these are OpenAI-compatible
+        let client = OpenAIClient::new(api_key, base_url, model, max_tokens, temperature, timeout);
+        Ok(LlmClient::OpenAi(client))
+    } else if url_for_check.contains("api.anthropic.com") {
+        let client = ClaudeClient::new(api_key, base_url, model, max_tokens, temperature, timeout);
+        Ok(LlmClient::Claude(client))
+    } else {
+        Err(AppError::AiError(format!(
+            "Unsupported base URL: {}. Please use a known provider.",
+            url_for_check
+        )))
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct PdfSummarizationRequest {
@@ -101,18 +137,20 @@ pub async fn process_pdf_summarization(
         }
     };
     
-    // Step 4: Create AI client with provided settings
-    let ai_client = OpenAIClient::new(
-        api_key,
-        base_url,
-        model,
-        max_tokens,
-        temperature,
-        timeout,
-    );
-    
+    // Step 4: Create AI client using the factory
+    let ai_client = match get_llm_client(api_key, base_url, model, max_tokens, temperature, timeout) {
+        Ok(client) => client,
+        Err(e) => {
+            return Ok(PdfSummarizationResponse {
+                summary: String::new(),
+                success: false,
+                error: Some(e.to_string()),
+            });
+        }
+    };
+
     // Step 5: Call AI service for summarization
-    match ai_client.summarize_text(&text, &prompt).await {
+    match ai_client.summarize(&text, &prompt).await {
         Ok(summary) => Ok(PdfSummarizationResponse {
             summary,
             success: true,
@@ -143,14 +181,16 @@ pub async fn test_ai_connection(
     }
     
     // Create AI client for testing
-    let ai_client = OpenAIClient::new(
-        api_key,
-        base_url,
-        model,
-        Some(20), // Small max_tokens for test
-        Some(0.1), // Low temperature for consistent test
-        timeout,
-    );
+    let ai_client = match get_llm_client(api_key, base_url, model, Some(20), Some(0.1), timeout) {
+        Ok(client) => client,
+        Err(e) => {
+            return Ok(ConnectionTestResponse {
+                success: false,
+                message: None,
+                error: Some(e.to_string()),
+            });
+        }
+    };
     
     // Test the connection
     match ai_client.test_connection().await {
@@ -226,18 +266,19 @@ pub async fn process_ai_chat(
     }
 
     // Step 2: Create AI client with provided settings
-    let ai_client = OpenAIClient::new(
-        api_key,
-        base_url,
-        model,
-        max_tokens,
-        temperature,
-        timeout,
-    );
-    
+    let ai_client = match get_llm_client(api_key, base_url, model, max_tokens, temperature, timeout) {
+        Ok(client) => client,
+        Err(e) => {
+            return Ok(AiChatResponse {
+                response: String::new(),
+                success: false,
+                error: Some(e.to_string()),
+            });
+        }
+    };
+
     // Step 3: Call AI service for chat response
-    // We'll use the existing summarize_text method but with a more generic approach
-    match ai_client.process_chat(&prompt).await {
+    match ai_client.chat(&prompt).await {
         Ok(response) => Ok(AiChatResponse {
             response,
             success: true,

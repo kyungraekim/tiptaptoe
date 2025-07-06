@@ -4,7 +4,7 @@ use std::path::Path;
 
 mod errors;
 mod pdf_processor;
-mod ai_client;
+pub mod llm;
 mod commands;
 
 use commands::{process_pdf_summarization, analyze_pdf, test_ai_connection, process_ai_chat};
