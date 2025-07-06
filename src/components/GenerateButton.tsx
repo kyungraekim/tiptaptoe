@@ -12,7 +12,6 @@ interface GenerateButtonProps {
 export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerated }) => {
   const [status, setStatus] = useState<ProcessingStatus>({
     isProcessing: false,
-    progress: 0,
     message: ''
   });
 
@@ -49,7 +48,6 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
 
       setStatus({
         isProcessing: true,
-        progress: 25,
         message: 'Processing PDF file...'
       });
 
@@ -64,7 +62,6 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
 
       setStatus({
         isProcessing: true,
-        progress: 50,
         message: 'Generating summary'
       });
 
@@ -86,7 +83,6 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
 
       setStatus({
         isProcessing: true,
-        progress: 100,
         message: 'Summary generated successfully!'
       });
 
@@ -112,7 +108,6 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
       
       setStatus({
         isProcessing: false,
-        progress: 0,
         message: 'Failed to generate summary'
       });
       
@@ -137,7 +132,6 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
         console.log("Resetting status");
         setStatus({
           isProcessing: false,
-          progress: 0,
           message: ''
         });
       }, 2000);
@@ -161,7 +155,26 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
           minWidth: "80px"
         }}
       >
-        {status.isProcessing ? 'Processing...' : 'Generate'}
+        {status.isProcessing ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              borderTop: '2px solid #fff',
+              borderRadius: '50%',
+              width: '14px',
+              height: '14px',
+              animation: 'spin 1s linear infinite',
+            }}>
+              <style>{`
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `}</style>
+            </div>
+            <span style={{ marginLeft: '8px' }}>Processing...</span>
+          </div>
+        ) : 'Generate'}
       </button>
       
       {/* Progress indicator */}
@@ -176,7 +189,7 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
           color: '#6b7280',
           textAlign: 'center'
         }}>
-          {status.message} ({status.progress}%)
+          {status.message}
         </div>
       )}
     </div>

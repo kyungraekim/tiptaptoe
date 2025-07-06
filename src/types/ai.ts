@@ -14,7 +14,6 @@ export interface PdfSummarizationResponse {
 
 export interface ProcessingStatus {
     isProcessing: boolean;
-    progress: number;
     message: string;
 }
 
