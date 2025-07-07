@@ -1,10 +1,11 @@
 use crate::errors::AppError;
-use crate::llm::claude::ClaudeClient;
-use crate::llm::openai::OpenAIClient;
+use crate::llm::claude::client::ClaudeClient;
+use crate::llm::openai::client::OpenAIClient;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 pub mod claude;
+pub mod factory;
 pub mod openai;
 pub mod reasoning;
 

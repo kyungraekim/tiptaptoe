@@ -1,59 +1,12 @@
-// src-tauri/src/llm/claude.rs
+// src-tauri/src/llm/claude/client.rs
+use super::models::{ClaudeMessage, ClaudeRequest};
+use super::services::post_chat_completion;
 use crate::errors::AppError;
-use super::reasoning::extract_reasoning_and_output;
-use crate::llm::{LLMClient, ReasoningResponse};
+use crate::llm::{reasoning::extract_reasoning_and_output, LLMClient, ReasoningResponse};
 use async_trait::async_trait;
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
-// --- Request Structs ---
-#[derive(Serialize)]
-struct ClaudeRequest {
-    model: String,
-    messages: Vec<ClaudeMessage>,
-    max_tokens: u32,
-    temperature: f32,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    system: Option<String>,
-}
-
-#[derive(Serialize)]
-struct ClaudeMessage {
-    role: String,
-    content: String,
-}
-
-// --- Response Structs ---
-#[derive(Deserialize)]
-struct ClaudeResponse {
-    content: Vec<ClaudeContent>,
-    stop_reason: String,
-}
-
-#[derive(Deserialize)]
-struct ClaudeContent {
-    #[serde(rename = "type")]
-    content_type: String,
-    text: String,
-}
-
-// --- Error Structs ---
-#[derive(Deserialize)]
-struct ClaudeErrorResponse {
-    #[serde(rename = "type")]
-    error_type: String,
-    error: ClaudeErrorDetails,
-}
-
-#[derive(Deserialize)]
-struct ClaudeErrorDetails {
-    #[serde(rename = "type")]
-    _type: String,
-    message: String,
-}
-
-// --- Client Implementation ---
 pub struct ClaudeClient {
     client: Client,
     api_key: String,
@@ -107,41 +60,25 @@ impl LLMClient for ClaudeClient {
 
         let request = ClaudeRequest {
             model: self.model.clone(),
-            messages: vec![ClaudeMessage { role: "user".to_string(), content: prompt.to_string() }],
+            messages: vec![ClaudeMessage {
+                role: "user".to_string(),
+                content: prompt.to_string(),
+            }],
             max_tokens: self.max_tokens,
             temperature: self.temperature,
-            system: None, // Not used for basic chat, but available
+            system: None,
         };
 
-        let response = self.client
-            .post(&format!("{}/messages", self.base_url))
-            .header("x-api-key", &self.api_key)
-            .header("anthropic-version", "2023-06-01")
-            .header("Content-Type", "application/json")
-            .json(&request)
-            .send()
-            .await
-            .map_err(|e| AppError::AiError(format!("Network error: {}", e)))?;
+        let api_response =
+            post_chat_completion(&self.client, &self.base_url, &self.api_key, &request).await?;
 
-        let status = response.status();
-        let response_text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-
-        if !status.is_success() {
-            if let Ok(error_response) = serde_json::from_str::<ClaudeErrorResponse>(&response_text) {
-                return Err(AppError::AiError(format!("API Error: {}", error_response.error.message)));
-            }
-            return Err(AppError::AiError(format!("API Error ({}): {}", status, response_text)));
-        }
-
-        let api_response: ClaudeResponse = serde_json::from_str(&response_text)
-            .map_err(|e| AppError::AiError(format!("Failed to parse API response: {}", e)))?;
-
-        if let Some(content) = api_response.content.into_iter().find(|c| c.content_type == "text") {
+        if let Some(content) = api_response
+            .content
+            .into_iter()
+            .find(|c| c.content_type == "text")
+        {
             let (reasoning, output) = extract_reasoning_and_output(&content.text);
-            Ok(ReasoningResponse {
-                reasoning,
-                output,
-            })
+            Ok(ReasoningResponse { reasoning, output })
         } else {
             Err(AppError::AiError("No text content in response".to_string()))
         }
@@ -149,7 +86,9 @@ impl LLMClient for ClaudeClient {
 
     async fn summarize(&self, text: &str, prompt: &str) -> Result<String, AppError> {
         if text.trim().is_empty() {
-            return Err(AppError::AiError("No text provided for summarization".to_string()));
+            return Err(AppError::AiError(
+                "No text provided for summarization".to_string(),
+            ));
         }
         if prompt.trim().is_empty() {
             return Err(AppError::AiError("No prompt provided".to_string()));
@@ -157,7 +96,7 @@ impl LLMClient for ClaudeClient {
 
         let max_chars = self.estimate_max_chars();
         let truncated_text = if text.len() > max_chars {
-            format!("{}...[truncated for length]", &text[..max_chars])
+            format!("{}[truncated for length]", &text[..max_chars])
         } else {
             text.to_string()
         };

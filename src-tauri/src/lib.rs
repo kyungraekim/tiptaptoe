@@ -3,11 +3,13 @@ use std::fs;
 use std::path::Path;
 
 mod errors;
+mod pdf;
 mod pdf_processor;
 pub mod llm;
 mod commands;
 
-use commands::{process_pdf_summarization, analyze_pdf, test_ai_connection, process_ai_chat};
+use commands::ai_commands::{process_ai_chat, test_ai_connection};
+use commands::pdf_commands::{analyze_pdf, process_pdf_summarization};
 
 #[tauri::command]
 fn greet(name: &str) -> String {
