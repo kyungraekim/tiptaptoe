@@ -41,6 +41,26 @@ export interface ChatMessage {
     timestamp: Date;
 }
 
+export interface FileContext {
+    id: string;
+    name: string;
+    path: string;
+    type: 'pdf' | 'text' | 'markdown';
+    size?: string;
+    extractedContent?: string;
+    summary?: string;
+    addedAt: Date;
+}
+
+export interface ChatSession {
+    id: string;
+    selectedText: string;
+    usedFiles: Set<string>; // file IDs that were already used in this conversation
+    availableFiles: FileContext[];
+    messages: ChatMessage[];
+    createdAt: Date;
+}
+
 export interface ConnectionTestResponse {
     success: boolean;
     message?: string;

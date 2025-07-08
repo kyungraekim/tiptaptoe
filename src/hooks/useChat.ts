@@ -3,18 +3,44 @@ import { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { marked } from 'marked';
 import { loadAISettings, validateAISettings } from '../utils/settingsStorage';
-import { ChatMessage } from '../types/ai';
+import { ChatMessage, FileContext } from '../types/ai';
 
 export interface UseChatProps {
   selectedText: string;
   onApplyResponse?: (response: string, action: 'append' | 'replace') => void;
+  initialFiles?: FileContext[];
 }
 
-export const useChat = ({ selectedText, onApplyResponse }: UseChatProps) => {
+export const useChat = ({ selectedText, onApplyResponse, initialFiles = [] }: UseChatProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [availableFiles, setAvailableFiles] = useState<FileContext[]>(initialFiles);
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set(
+    // Auto-select PDF files that have summaries (from Generate button)
+    initialFiles.filter(f => f.type === 'pdf' && f.summary).map(f => f.id)
+  ));
+  const [usedFiles, setUsedFiles] = useState<Set<string>>(new Set());
+
+  // Update available files and auto-select new PDF files when initialFiles changes
+  useEffect(() => {
+    setAvailableFiles(initialFiles);
+    
+    // Auto-select new PDF files that have summaries
+    const newPdfFiles = initialFiles.filter(f => f.type === 'pdf' && f.summary);
+    if (newPdfFiles.length > 0) {
+      setSelectedFiles(prev => {
+        const newSet = new Set(prev);
+        newPdfFiles.forEach(file => {
+          if (!usedFiles.has(file.id)) {
+            newSet.add(file.id);
+          }
+        });
+        return newSet;
+      });
+    }
+  }, [initialFiles, usedFiles]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,15 +88,29 @@ export const useChat = ({ selectedText, onApplyResponse }: UseChatProps) => {
     setError(null);
 
     try {
+      // Build file context string
+      const selectedFileContexts = availableFiles.filter(f => selectedFiles.has(f.id));
+      const fileContextString = selectedFileContexts.length > 0 
+        ? `\n\nFile Context:\n${selectedFileContexts.map(f => 
+            `File: ${f.name} (${f.type})\n${f.extractedContent || f.summary || 'No content available'}`
+          ).join('\n\n')}`
+        : '';
+
       const conversationContext = `
-Selected text: "${selectedText}"
+Selected text: "${selectedText}"${fileContextString}
 
 Previous conversation:
 ${messages.map(m => `${m.role}: ${m.content}`).join('\n')}
 
 User: ${userMessage.content}
 
-Please respond helpfully about the selected text. Keep responses focused and actionable.`;
+Please respond helpfully about the selected text and any provided file context. Keep responses focused and actionable.`;
+
+      // Mark selected files as used
+      if (selectedFileContexts.length > 0) {
+        setUsedFiles(prev => new Set([...prev, ...selectedFileContexts.map(f => f.id)]));
+        setSelectedFiles(new Set()); // Clear selection after use
+      }
 
       const response = await invoke<any>('process_ai_chat', {
         chatRequest: {
@@ -117,6 +157,20 @@ Please respond helpfully about the selected text. Keep responses focused and act
     setMessages([]);
     setInputValue('');
     setError(null);
+    setUsedFiles(new Set());
+    setSelectedFiles(new Set());
+  };
+
+  const handleFileToggle = (fileId: string, isSelected: boolean) => {
+    setSelectedFiles(prev => {
+      const newSet = new Set(prev);
+      if (isSelected) {
+        newSet.add(fileId);
+      } else {
+        newSet.delete(fileId);
+      }
+      return newSet;
+    });
   };
 
   return {
@@ -125,9 +179,14 @@ Please respond helpfully about the selected text. Keep responses focused and act
     isLoading,
     error,
     messagesEndRef,
+    availableFiles,
+    selectedFiles,
+    usedFiles,
     setInputValue,
     sendMessage,
     applyResponse,
     clearChat,
+    setAvailableFiles,
+    handleFileToggle,
   };
 };

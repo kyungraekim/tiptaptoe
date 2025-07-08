@@ -110,3 +110,19 @@ pub async fn analyze_pdf(file_path: String) -> Result<PdfAnalysisResponse, Strin
         }),
     }
 }
+
+#[tauri::command]
+pub async fn extract_pdf_text(file_path: String) -> Result<serde_json::Value, String> {
+    match PdfProcessor::extract_text(&file_path) {
+        Ok(text) => Ok(serde_json::json!({
+            "content": text,
+            "success": true,
+            "error": null
+        })),
+        Err(e) => Ok(serde_json::json!({
+            "content": null,
+            "success": false,
+            "error": e.to_string()
+        })),
+    }
+}

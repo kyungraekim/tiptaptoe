@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { AppEditor } from "./components/AppEditor";
 import { GenerateButton } from "./components/GenerateButton";
 import { SettingsIcon } from "./components/SettingsIcon";
+import { FileContextProvider } from "./contexts/FileContextProvider";
 import { invoke } from "@tauri-apps/api/core";
 import { migrateOldSettings } from "./utils/settingsStorage";
 import { marked } from "marked";
@@ -97,12 +98,13 @@ function App() {
   };
 
   return (
-    <div style={{
-      maxWidth: "1200px",
-      margin: "0 auto",
-      padding: "20px",
-      fontFamily: "system-ui, -apple-system, sans-serif"
-    }}>
+    <FileContextProvider>
+      <div style={{
+        maxWidth: "1200px",
+        margin: "0 auto",
+        padding: "20px",
+        fontFamily: "system-ui, -apple-system, sans-serif"
+      }}>
       <header style={{
         display: "flex",
         justifyContent: "space-between",
@@ -179,7 +181,8 @@ function App() {
           Use the <strong>⚙️ Settings</strong> icon to configure your AI provider and preferences.
         </p>
       </footer>
-    </div>
+      </div>
+    </FileContextProvider>
   );
 }
 

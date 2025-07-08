@@ -9,7 +9,7 @@ pub mod llm;
 mod commands;
 
 use commands::ai_commands::{process_ai_chat, test_ai_connection};
-use commands::pdf_commands::{analyze_pdf, process_pdf_summarization};
+use commands::pdf_commands::{analyze_pdf, process_pdf_summarization, extract_pdf_text};
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -51,6 +51,7 @@ pub fn run() {
             load_document,
             process_pdf_summarization,
             analyze_pdf,
+            extract_pdf_text,
             test_ai_connection,
             process_ai_chat
         ])

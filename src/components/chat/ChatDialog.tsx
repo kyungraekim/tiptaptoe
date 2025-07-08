@@ -3,20 +3,24 @@ import { useChat } from '../../hooks/useChat';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessages } from './ChatMessages';
 import { ChatInput } from './ChatInput';
+import { FileContextPanel } from './FileContextPanel';
 import { createOverlayStyle } from '../../styles/utilities';
+import { FileContext } from '../../types/ai';
 
 interface ChatDialogProps {
   isOpen: boolean;
   onClose: () => void;
   selectedText: string;
   onApplyResponse: (response: string, action: 'append' | 'replace') => void;
+  initialFiles?: FileContext[];
 }
 
 export const ChatDialog: React.FC<ChatDialogProps> = ({
   isOpen,
   onClose,
   selectedText,
-  onApplyResponse
+  onApplyResponse,
+  initialFiles = []
 }) => {
   const {
     messages,
@@ -24,10 +28,15 @@ export const ChatDialog: React.FC<ChatDialogProps> = ({
     isLoading,
     error,
     messagesEndRef,
+    availableFiles,
+    selectedFiles,
+    usedFiles,
     setInputValue,
     sendMessage,
     applyResponse,
-  } = useChat({ selectedText, onApplyResponse });
+    setAvailableFiles,
+    handleFileToggle,
+  } = useChat({ selectedText, onApplyResponse, initialFiles });
 
   const handleApplyResponse = async (message: any, action: 'append' | 'replace') => {
     await applyResponse(message, action);
@@ -54,6 +63,14 @@ export const ChatDialog: React.FC<ChatDialogProps> = ({
           title="AI Chat Assistant"
           selectedText={selectedText}
           onClose={onClose}
+        />
+
+        <FileContextPanel
+          availableFiles={availableFiles}
+          usedFiles={usedFiles}
+          onFilesChange={setAvailableFiles}
+          onFileToggle={handleFileToggle}
+          selectedFiles={selectedFiles}
         />
 
         <ChatMessages

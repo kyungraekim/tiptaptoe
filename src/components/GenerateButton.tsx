@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
-import type { PdfSummarizationResponse, ProcessingStatus } from '../types/ai';
+import type { PdfSummarizationResponse, ProcessingStatus, FileContext } from '../types/ai';
 import { loadAISettings, validateAISettings } from '../utils/settingsStorage';
+import { useFileContext } from '../contexts/FileContextProvider';
 import { Button } from './ui';
 
 interface GenerateButtonProps {
@@ -11,6 +12,7 @@ interface GenerateButtonProps {
 }
 
 export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerated }) => {
+  const { addFile } = useFileContext();
   const [status, setStatus] = useState<ProcessingStatus>({
     isProcessing: false,
     message: ''
@@ -92,6 +94,38 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
         console.log("Calling onSummaryGenerated callback...");
         onSummaryGenerated(response.summary);
         console.log("Callback completed");
+
+        // Add the PDF file to the global context for chat use
+        const fileName = typeof selectedFile === 'string' 
+          ? selectedFile.split('/').pop() || selectedFile
+          : 'Unknown PDF';
+        
+        // Try to extract full text for better context
+        let extractedContent = '';
+        try {
+          const textResponse = await invoke<{ success: boolean; content?: string; error?: string }>('extract_pdf_text', {
+            filePath: selectedFile
+          });
+          
+          if (textResponse.success && textResponse.content) {
+            extractedContent = textResponse.content;
+          }
+        } catch (error) {
+          console.error('Failed to extract PDF text for context:', error);
+        }
+        
+        const fileContext: FileContext = {
+          id: Date.now().toString(),
+          name: fileName,
+          path: typeof selectedFile === 'string' ? selectedFile : '',
+          type: 'pdf',
+          summary: response.summary,
+          extractedContent: extractedContent || response.summary, // Fallback to summary if text extraction fails
+          addedAt: new Date()
+        };
+
+        addFile(fileContext);
+        console.log("PDF file added to global context for chat use");
       } else {
         console.error("Summary generation failed:", response.error);
         throw new Error(response.error || 'Failed to generate summary');

@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Editor } from '@tiptap/react';
 import { ChatBubble } from '../components/ChatBubble';
 import { ChatDialog } from '../components/ChatDialog';
+import { useFileContext } from '../contexts/FileContextProvider';
 
 interface ChatPluginComponentProps {
   editor: Editor;
 }
 
 export const ChatPluginComponent: React.FC<ChatPluginComponentProps> = ({ editor }) => {
+  const { availableFiles } = useFileContext();
   const [isChatDialogOpen, setIsChatDialogOpen] = useState(false);
   const [selectedTextForChat, setSelectedTextForChat] = useState('');
 
@@ -50,6 +52,7 @@ export const ChatPluginComponent: React.FC<ChatPluginComponentProps> = ({ editor
         onClose={() => setIsChatDialogOpen(false)}
         selectedText={selectedTextForChat}
         onApplyResponse={handleApplyResponse}
+        initialFiles={availableFiles}
       />
     </>
   );
