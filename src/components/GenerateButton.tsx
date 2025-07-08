@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import type { PdfSummarizationResponse, ProcessingStatus } from '../types/ai';
 import { loadAISettings, validateAISettings } from '../utils/settingsStorage';
+import { Button } from './ui';
 
 interface GenerateButtonProps {
   onSummaryGenerated: (summary: string) => void;
@@ -140,42 +141,15 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({ onSummaryGenerat
 
   return (
     <div style={{ position: 'relative' }}>
-      <button 
+      <Button
+        variant="success"
         onClick={handleGenerate}
         disabled={status.isProcessing}
-        style={{
-          padding: "8px 16px",
-          backgroundColor: status.isProcessing ? "#94a3b8" : "#10b981",
-          color: "white",
-          border: "1px solid transparent",
-          borderRadius: "6px",
-          cursor: status.isProcessing ? "not-allowed" : "pointer",
-          fontSize: "14px",
-          fontWeight: "500",
-          minWidth: "80px"
-        }}
+        isLoading={status.isProcessing}
+        style={{ minWidth: '80px' }}
       >
-        {status.isProcessing ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{
-              border: '2px solid rgba(255, 255, 255, 0.3)',
-              borderTop: '2px solid #fff',
-              borderRadius: '50%',
-              width: '14px',
-              height: '14px',
-              animation: 'spin 1s linear infinite',
-            }}>
-              <style>{`
-                @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
-              `}</style>
-            </div>
-            <span style={{ marginLeft: '8px' }}>Processing...</span>
-          </div>
-        ) : 'Generate'}
-      </button>
+        {status.isProcessing ? 'Processing...' : 'Generate'}
+      </Button>
       
       {/* Progress indicator */}
       {status.isProcessing && (

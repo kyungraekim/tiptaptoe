@@ -339,3 +339,69 @@ export const SunIcon: React.FC<IconProps> = ({ className, ...props }) => (
     <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
   </svg>
 );
+
+export const CloseIcon: React.FC<IconProps> = ({ className, ...props }) => (
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    {...props}
+  >
+    <path d="M18 6L6 18M6 6l12 12" />
+  </svg>
+);
+
+export const SettingsIcon: React.FC<IconProps> = ({ className, ...props }) => (
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    {...props}
+  >
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.5-3.5L19 4.5m-2.5 15.5L19 19.5M4.5 4.5L7 7m10 10l2.5 2.5" />
+  </svg>
+);
+
+export const ChatIcon: React.FC<IconProps> = ({ className, ...props }) => (
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    {...props}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+);
+
+export const CheckIcon: React.FC<IconProps> = ({ className, ...props }) => (
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    {...props}
+  >
+    <polyline points="20,6 9,17 4,12" />
+  </svg>
+);
+
+export const XIcon: React.FC<IconProps> = ({ className, ...props }) => (
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    {...props}
+  >
+    <path d="M18 6L6 18M6 6l12 12" />
+  </svg>
+);

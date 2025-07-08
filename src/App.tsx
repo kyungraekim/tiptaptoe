@@ -6,6 +6,7 @@ import { SettingsIcon } from "./components/SettingsIcon";
 import { invoke } from "@tauri-apps/api/core";
 import { migrateOldSettings } from "./utils/settingsStorage";
 import { marked } from "marked";
+import { Button } from "./components/ui";
 import "./App.css";
 
 function App() {
@@ -120,49 +121,15 @@ function App() {
         </div>
 
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <button
-            onClick={newDocument}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#f3f4f6",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "500"
-            }}
-          >
+          <Button variant="secondary" onClick={newDocument}>
             New
-          </button>
-          <button
-            onClick={loadDocument}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#f3f4f6",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "500"
-            }}
-          >
+          </Button>
+          <Button variant="secondary" onClick={loadDocument}>
             Load
-          </button>
-          <button
-            onClick={saveDocument}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#3b82f6",
-              color: "white",
-              border: "1px solid #3b82f6",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "500"
-            }}
-          >
+          </Button>
+          <Button variant="primary" onClick={saveDocument}>
             Save
-          </button>
+          </Button>
           <GenerateButton onSummaryGenerated={handleSummaryGenerated} />
           <SettingsIcon />
         </div>
