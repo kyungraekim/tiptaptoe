@@ -1,0 +1,124 @@
+/* Comment system styles */
+.comment-mark {
+  background-color: #fef3c7;
+  border-bottom: 2px solid #f59e0b;
+  cursor: pointer;
+  position: relative;
+  border-radius: 2px;
+  padding: 1px 2px;
+  transition: all 0.2s ease;
+}
+
+/* Comments panel responsive design */
+.comments-panel {
+  border-left: 1px solid #e5e7eb;
+  background-color: #fafafa;
+  min-width: 320px;
+  max-width: 400px;
+  width: 320px;
+  flex-shrink: 0;
+}
+
+/* Selection indicator for commenting */
+.ProseMirror-selectednode {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Custom selection styles for commenting */
+.ProseMirror .ProseMirror-selection::after {
+  content: '💬 Right-click or Cmd/Ctrl+Shift+C to add comment';
+  position: absolute;
+  top: -30px;
+  left: 0;
+  background: #374151;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.comment-mark:hover {
+  background-color: #fde68a;
+  border-bottom-color: #d97706;
+}
+
+.comment-mark.active {
+  background-color: #fcd34d;
+  border-bottom-color: #b45309;
+}
+
+.comment-popover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: white;
+  z-index: 1000;
+}
+
+.comments-panel {
+  border-left: 1px solid #e5e7eb;
+  background-color: #fafafa;
+}
+
+.comments-panel .comment-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.comments-panel .comment-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.comments-panel .comment-item.resolved {
+  background-color: #f9fafb;
+  opacity: 0.7;
+}
+
+.comments-panel .comment-item.resolved .comment-content {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+.magic-wand-button {
+  position: relative;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border: none;
+  color: white;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.magic-wand-button:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+}
+
+.magic-wand-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.magic-wand-button .badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 10px;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}

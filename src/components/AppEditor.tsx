@@ -16,7 +16,9 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 
 // Plugins
-import { chatPlugin } from '../plugins/ChatPlugin';
+import { createChatPlugin } from '../plugins/ChatPlugin';
+import { CommentMark } from '../extensions/CommentMark';
+import { Comment } from '../types/comments';
 
 const DEFAULT_CONTENT = `
 <h1>Welcome to Tiptap Simple Editor</h1>
@@ -38,10 +40,11 @@ const DEFAULT_CONTENT = `
 interface AppEditorProps {
   content?: string;
   onChange?: (content: string) => void;
+  onCommentsChange?: (comments: Comment[]) => void;
 }
 
 export const AppEditor = React.forwardRef<any, AppEditorProps>(
-  ({ content, onChange }, ref) => {
+  ({ content, onChange, onCommentsChange }, ref) => {
     const editorConfig = {
       extensions: [
         StarterKit,
@@ -55,9 +58,10 @@ export const AppEditor = React.forwardRef<any, AppEditorProps>(
         Superscript,
         Subscript,
         Link.configure({ openOnClick: false }),
+        CommentMark,
       ],
       content: content || DEFAULT_CONTENT,
-      plugins: [chatPlugin],
+      plugins: [createChatPlugin(onCommentsChange)],
     };
 
     return (

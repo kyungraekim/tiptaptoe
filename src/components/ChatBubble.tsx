@@ -5,9 +5,10 @@ import { Editor } from '@tiptap/react';
 interface ChatBubbleProps {
   editor: Editor | null;
   onChatClick: (selectedText: string) => void;
+  onCommentClick: (selectedText: string) => void;
 }
 
-export const ChatBubble: React.FC<ChatBubbleProps> = ({ editor, onChatClick }) => {
+export const ChatBubble: React.FC<ChatBubbleProps> = ({ editor, onChatClick, onCommentClick }) => {
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [selectedText, setSelectedText] = useState('');
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -79,10 +80,14 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ editor, onChatClick }) =
     onChatClick(selectedText);
   };
 
+  const handleCommentClick = () => {
+    onCommentClick(selectedText);
+  };
+
   return (
     <div
       ref={bubbleRef}
-      className="chat-bubble"
+      className="selection-bubble"
       style={{
         position: 'absolute',
         top: position.top,
@@ -91,30 +96,66 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ editor, onChatClick }) =
         backgroundColor: '#3b82f6',
         color: 'white',
         borderRadius: '20px',
-        padding: '8px 12px',
+        padding: '6px',
         fontSize: '14px',
         fontWeight: '500',
-        cursor: 'pointer',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         display: 'flex',
         alignItems: 'center',
-        gap: '6px',
+        gap: '4px',
         transition: 'all 0.2s ease',
         userSelect: 'none',
         border: '1px solid rgba(255, 255, 255, 0.2)',
       }}
-      onClick={handleChatClick}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#2563eb';
-        e.currentTarget.style.transform = 'scale(1.05)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = '#3b82f6';
-        e.currentTarget.style.transform = 'scale(1)';
-      }}
     >
-      <ChatIcon />
-      <span>Chat</span>
+      <button
+        onClick={handleChatClick}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '6px',
+          borderRadius: '12px',
+          transition: 'background-color 0.2s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+        title="Chat with AI"
+      >
+        <ChatIcon />
+      </button>
+      <button
+        onClick={handleCommentClick}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '6px',
+          borderRadius: '12px',
+          transition: 'background-color 0.2s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+        title="Add Comment"
+      >
+        <CommentIcon />
+      </button>
     </div>
   );
 };
@@ -132,5 +173,21 @@ const ChatIcon: React.FC = () => (
     strokeLinejoin="round"
   >
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+// Comment icon SVG component  
+const CommentIcon: React.FC = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
   </svg>
 );

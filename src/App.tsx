@@ -3,21 +3,29 @@ import { useState, useRef, useEffect } from "react";
 import { AppEditor } from "./components/AppEditor";
 import { GenerateButton } from "./components/GenerateButton";
 import { SettingsIcon } from "./components/SettingsIcon";
+import { CommentsPanel } from "./components/CommentsPanel";
 import { FileContextProvider } from "./contexts/FileContextProvider";
 import { invoke } from "@tauri-apps/api/core";
 import { migrateOldSettings } from "./utils/settingsStorage";
 import { marked } from "marked";
 import { Button } from "./components/ui";
+import { Comment } from "./types/comments";
+import { commentStorage } from "./utils/commentStorage";
 import "./App.css";
+import "./styles/comments.css";
 
 function App() {
   const [content, setContent] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
+  const [comments, setComments] = useState<Comment[]>([]);
   const editorRef = useRef<any>(null);
 
   // Migrate old settings on app start
   useEffect(() => {
     migrateOldSettings();
+    // Load comments
+    const loadedComments = commentStorage.getComments();
+    setComments(loadedComments);
   }, []);
 
   const handleContentChange = (newContent: string) => {
@@ -97,6 +105,36 @@ function App() {
     setTimeout(() => setSavedMessage(""), 3000);
   };
 
+  const handleCommentUpdate = (commentId: string, content: string) => {
+    commentStorage.updateComment(commentId, content);
+    setComments(commentStorage.getComments());
+  };
+
+  const handleCommentDelete = (commentId: string) => {
+    commentStorage.deleteComment(commentId);
+    setComments(commentStorage.getComments());
+  };
+
+  const handleCommentResolve = (commentId: string) => {
+    commentStorage.resolveComment(commentId);
+    setComments(commentStorage.getComments());
+  };
+
+  const handleCommentJump = (commentId: string) => {
+    const comment = comments.find(c => c.id === commentId);
+    if (comment && editorRef.current) {
+      const editor = editorRef.current;
+      editor.chain()
+        .focus()
+        .setTextSelection(comment.position)
+        .run();
+    }
+  };
+
+  const handleCommentsChange = (newComments: Comment[]) => {
+    setComments(newComments);
+  };
+
   return (
     <FileContextProvider>
       <div style={{
@@ -155,12 +193,30 @@ function App() {
         border: "2px solid #e5e7eb",
         borderRadius: "8px",
         backgroundColor: "white",
-        overflow: "hidden"
+        overflow: "hidden",
+        display: "flex",
+        minHeight: "600px",
+        maxHeight: "80vh"
       }}>
-        <AppEditor
-          ref={editorRef}
-          content={content}
-          onChange={handleContentChange}
+        <div style={{ 
+          flex: 1, 
+          display: "flex", 
+          flexDirection: "column",
+          minWidth: "0"
+        }}>
+          <AppEditor
+            ref={editorRef}
+            content={content}
+            onChange={handleContentChange}
+            onCommentsChange={handleCommentsChange}
+          />
+        </div>
+        <CommentsPanel
+          comments={comments}
+          onCommentUpdate={handleCommentUpdate}
+          onCommentDelete={handleCommentDelete}
+          onCommentResolve={handleCommentResolve}
+          onCommentJump={handleCommentJump}
         />
       </div>
 
