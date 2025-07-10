@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { TiptapEditor } from '@tiptaptoe/tiptap-editor';
 import '@tiptaptoe/tiptap-editor/dist/styles.css';
 
@@ -15,10 +15,11 @@ import Superscript from '@tiptap/extension-superscript';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 
-// Plugins
+// Plugins and utilities
 import { createChatPlugin } from '../plugins/ChatPlugin';
 import { CommentMark } from '../extensions/CommentMark';
 import { Comment } from '../types/comments';
+import { CommentSynchronizer } from '../utils/commentSynchronizer';
 
 const DEFAULT_CONTENT = `
 <h1>Welcome to Tiptap Simple Editor</h1>
@@ -41,10 +42,13 @@ interface AppEditorProps {
   content?: string;
   onChange?: (content: string) => void;
   onCommentsChange?: (comments: Comment[]) => void;
+  onCommentSync?: () => void;
 }
 
 export const AppEditor = React.forwardRef<any, AppEditorProps>(
-  ({ content, onChange, onCommentsChange }, ref) => {
+  ({ content, onChange, onCommentsChange, onCommentSync }, ref) => {
+    const synchronizerRef = useRef<CommentSynchronizer | null>(null);
+
     const editorConfig = {
       extensions: [
         StarterKit,
@@ -64,12 +68,102 @@ export const AppEditor = React.forwardRef<any, AppEditorProps>(
       plugins: [createChatPlugin(onCommentsChange)],
     };
 
+    // Set up synchronizer when editor is ready
+    const setupSynchronizer = (editor: any) => {
+      console.log('Setting up CommentSynchronizer with editor:', editor);
+      
+      if (editor && !synchronizerRef.current) {
+        synchronizerRef.current = new CommentSynchronizer(editor, onCommentSync);
+        
+        // Expose synchronizer globally for debugging
+        if (typeof window !== 'undefined') {
+          (window as any).commentSynchronizer = synchronizerRef.current;
+          console.log('CommentSynchronizer exposed as window.commentSynchronizer');
+        }
+        
+        // Add document change listener
+        const handleUpdate = () => {
+          console.log('Document update detected! Triggering synchronization...');
+          synchronizerRef.current?.debouncedSynchronize();
+        };
+        
+        editor.on('update', handleUpdate);
+        console.log('Update listener attached to editor');
+        
+        // Initial synchronization
+        console.log('Running initial synchronization...');
+        synchronizerRef.current.synchronize();
+        
+        // Store cleanup function
+        return () => {
+          console.log('Cleaning up editor listeners...');
+          editor.off('update', handleUpdate);
+          synchronizerRef.current?.destroy();
+          synchronizerRef.current = null;
+          
+          // Clean up global reference
+          if (typeof window !== 'undefined') {
+            delete (window as any).commentSynchronizer;
+          }
+        };
+      }
+    };
+
+    // Set up document change listeners when ref becomes available
+    useEffect(() => {
+      console.log('AppEditor useEffect triggered, checking ref...');
+      
+      let cleanup: (() => void) | undefined;
+      
+      // Poll for editor availability
+      const checkEditor = () => {
+        if (ref && 'current' in ref && ref.current) {
+          console.log('Editor found, setting up synchronizer...');
+          cleanup = setupSynchronizer(ref.current);
+          return true;
+        }
+        return false;
+      };
+      
+      // Try immediately
+      if (!checkEditor()) {
+        // If not available, poll every 100ms for up to 5 seconds
+        const interval = setInterval(() => {
+          if (checkEditor()) {
+            clearInterval(interval);
+          }
+        }, 100);
+        
+        // Cleanup interval after 5 seconds
+        setTimeout(() => {
+          clearInterval(interval);
+        }, 5000);
+        
+        return () => {
+          clearInterval(interval);
+          cleanup?.();
+        };
+      }
+      
+      return cleanup;
+    }, [ref, onCommentSync]);
+
+    // Enhanced onChange handler
+    const handleChange = (newContent: string) => {
+      onChange?.(newContent);
+      
+      // Trigger comment sync after content changes
+      if (synchronizerRef.current) {
+        synchronizerRef.current.debouncedSynchronize();
+      }
+    };
+
     return (
       <TiptapEditor
         ref={ref}
         config={editorConfig}
         content={content}
-        onChange={onChange}
+        onChange={handleChange}
         className="simple-editor"
       />
     );

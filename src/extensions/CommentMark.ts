@@ -7,6 +7,7 @@ declare module '@tiptap/core' {
       setCommentMark: (options: { commentId: string }) => ReturnType;
       unsetCommentMark: (commentId?: string) => ReturnType;
       toggleCommentMark: (options: { commentId: string }) => ReturnType;
+      removeCommentMark: (commentId: string) => ReturnType;
     };
   }
 }
@@ -80,6 +81,31 @@ export const CommentMark = Mark.create<CommentMarkProps>({
         (options) =>
         ({ commands }) => {
           return commands.toggleMark(this.name, options);
+        },
+      removeCommentMark:
+        (commentId) =>
+        ({ state, tr }) => {
+          const { doc } = state;
+          const ranges: { from: number; to: number }[] = [];
+          
+          doc.descendants((node, pos) => {
+            if (node.marks) {
+              node.marks.forEach((mark) => {
+                if (mark.type.name === this.name && mark.attrs.commentId === commentId) {
+                  ranges.push({
+                    from: pos,
+                    to: pos + node.nodeSize,
+                  });
+                }
+              });
+            }
+          });
+          
+          ranges.forEach(({ from, to }) => {
+            tr.removeMark(from, to, this.type);
+          });
+          
+          return true;
         },
     };
   },

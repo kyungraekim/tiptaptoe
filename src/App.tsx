@@ -11,6 +11,7 @@ import { marked } from "marked";
 import { Button } from "./components/ui";
 import { Comment } from "./types/comments";
 import { commentStorage } from "./utils/commentStorage";
+import "./utils/debugComments"; // Import debug utilities
 import "./App.css";
 import "./styles/comments.css";
 
@@ -111,7 +112,19 @@ function App() {
   };
 
   const handleCommentDelete = (commentId: string) => {
+    // Remove from storage
     commentStorage.deleteComment(commentId);
+    
+    // Remove comment mark from editor (Reactive Synchronization)
+    if (editorRef.current) {
+      const editor = editorRef.current;
+      editor.chain()
+        .focus()
+        .removeCommentMark(commentId)
+        .run();
+    }
+    
+    // Update UI
     setComments(commentStorage.getComments());
   };
 
@@ -133,6 +146,12 @@ function App() {
 
   const handleCommentsChange = (newComments: Comment[]) => {
     setComments(newComments);
+  };
+
+  // Refresh comments from storage (for synchronization updates)
+  const refreshComments = () => {
+    const updatedComments = commentStorage.getComments();
+    setComments(updatedComments);
   };
 
   return (
@@ -209,6 +228,7 @@ function App() {
             content={content}
             onChange={handleContentChange}
             onCommentsChange={handleCommentsChange}
+            onCommentSync={refreshComments}
           />
         </div>
         <CommentsPanel
