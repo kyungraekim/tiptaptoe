@@ -135,7 +135,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               Save
             </Button>
             <Button
-              data-style="outline"
+              data-style="default"
               onClick={handleCancel}
               style={{ fontSize: '11px', padding: '4px 8px' }}
             >
