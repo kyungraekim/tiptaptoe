@@ -66,13 +66,6 @@ export const testCommentSystemFunctionality = () => {
     }, 3000);
   };
   
-  // Run all tests
-  testExtensionLoading();
-  testCommentStyles();
-  testCommentsPanel();
-  testContentDeletion();
-  testUndoRedo();
-  
   // Test 4: Content deletion synchronization
   const testContentDeletion = () => {
     console.log('Test 4: Content Deletion Synchronization');
@@ -101,6 +94,13 @@ export const testCommentSystemFunctionality = () => {
       console.log('7. Try deleting a comment, then undo/redo the deletion');
     }, 5000);
   };
+
+  // Run all tests
+  testExtensionLoading();
+  testCommentStyles();
+  testCommentsPanel();
+  testContentDeletion();
+  testUndoRedo();
 
   // Instructions
   console.log('📝 Manual Testing Instructions:');

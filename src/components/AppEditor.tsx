@@ -106,8 +106,16 @@ export const AppEditor = React.forwardRef<any, AppEditorProps>(
         const handleUpdate = ({ transaction }: any) => {
           // Only sync if the content actually changed (not just selection changes)
           if (transaction.docChanged) {
-            console.log('Document content changed! Triggering synchronization...');
-            synchronizerRef.current?.debouncedSynchronize();
+            // Check if content was deleted by comparing document sizes
+            const oldSize = transaction.before.content.size;
+            const newSize = transaction.doc.content.size;
+            
+            // Only sync when content was deleted (document got smaller)
+            // This prevents unnecessary synchronization on typing, formatting, etc.
+            if (newSize < oldSize) {
+              console.log('Content deleted! Triggering synchronization...');
+              synchronizerRef.current?.debouncedSynchronize();
+            }
           }
         };
         
