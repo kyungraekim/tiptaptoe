@@ -5,8 +5,9 @@ interface CommentPopoverProps {
   isOpen: boolean;
   position: { x: number; y: number };
   selectedText: string;
-  onSubmit: (content: string) => void;
+  onSubmit: (content: string, author?: { id: string; name: string; color: string }) => void;
   onClose: () => void;
+  author?: { id: string; name: string; color: string };
 }
 
 export const CommentPopover: React.FC<CommentPopoverProps> = ({
@@ -15,6 +16,7 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
   selectedText,
   onSubmit,
   onClose,
+  author = { id: 'default-user', name: 'User', color: '#3b82f6' },
 }) => {
   const [content, setContent] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -27,7 +29,7 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
 
   const handleSubmit = () => {
     if (content.trim()) {
-      onSubmit(content.trim());
+      onSubmit(content.trim(), author);
       setContent('');
       onClose();
     }
@@ -62,6 +64,45 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
         maxWidth: '420px',
       }}
     >
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '8px', 
+        marginBottom: '16px',
+        paddingBottom: '12px',
+        borderBottom: '1px solid #e5e7eb'
+      }}>
+        <div style={{
+          width: '32px',
+          height: '32px',
+          borderRadius: '50%',
+          backgroundColor: author.color,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontSize: '14px',
+          fontWeight: '600'
+        }}>
+          {author.name.charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <div style={{ 
+            fontSize: '14px', 
+            fontWeight: '600', 
+            color: '#374151'
+          }}>
+            {author.name}
+          </div>
+          <div style={{ 
+            fontSize: '12px', 
+            color: '#6b7280'
+          }}>
+            {new Date().toLocaleString()}
+          </div>
+        </div>
+      </div>
+      
       <div style={{ marginBottom: '12px' }}>
         <div style={{ 
           fontSize: '14px', 

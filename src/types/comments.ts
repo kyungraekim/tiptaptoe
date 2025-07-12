@@ -7,6 +7,7 @@ export interface Comment {
   timestamp: Date;
   author?: string;
   resolved?: boolean;
+  threadId?: string;
 }
 
 export interface CommentPosition {

@@ -1,8 +1,7 @@
 import { Editor } from '@tiptap/react';
-import { commentStorage } from './commentStorage';
 
-export interface CommentMark {
-  commentId: string;
+export interface ThreadMark {
+  threadId: string;
   from: number;
   to: number;
 }
@@ -10,7 +9,7 @@ export interface CommentMark {
 export class CommentSynchronizer {
   private editor: Editor;
   private debounceTimer: number | null = null;
-  private readonly DEBOUNCE_DELAY = 200; // Reduced to 200ms delay
+  private readonly DEBOUNCE_DELAY = 200;
   private onSyncCallback?: () => void;
 
   constructor(editor: Editor, onSyncCallback?: () => void) {
@@ -19,21 +18,21 @@ export class CommentSynchronizer {
   }
 
   /**
-   * Get all comment marks currently in the editor by traversing the document
+   * Get all thread marks currently in the editor by traversing the document
    */
-  getEditorCommentMarks(): CommentMark[] {
+  getEditorThreadMarks(): ThreadMark[] {
     if (!this.editor) return [];
     
-    const marks: CommentMark[] = [];
+    const marks: ThreadMark[] = [];
     const { doc } = this.editor.state;
     
     try {
       doc.descendants((node, pos) => {
         if (node.marks) {
           node.marks.forEach((mark) => {
-            if (mark.type.name === 'commentMark' && mark.attrs.commentId) {
+            if (mark.type.name === 'commentMark' && mark.attrs.threadId) {
               marks.push({
-                commentId: mark.attrs.commentId,
+                threadId: mark.attrs.threadId,
                 from: pos,
                 to: pos + node.nodeSize,
               });
@@ -44,116 +43,124 @@ export class CommentSynchronizer {
       
       return marks;
     } catch (error) {
-      console.error('Error getting comment marks:', error);
+      console.error('Error getting thread marks:', error);
       return [];
     }
   }
 
   /**
-   * Validate comment positions against current document
-   * Only removes comments when positions are clearly invalid (beyond bounds or extraction fails)
+   * Get the comments provider from the editor
    */
-  validateCommentPositions(): void {
-    const comments = commentStorage.getComments();
+  private getProvider() {
+    return this.editor?.storage?.commentsKit?.provider;
+  }
+
+  /**
+   * Remove threads that don't have corresponding marks in the document
+   * This handles the case where text with comments was deleted
+   */
+  syncThreadsWithMarks(): void {
+    const provider = this.getProvider();
+    if (!provider) return;
+
+    const editorMarks = this.getEditorThreadMarks();
+    const existingThreads = provider.getThreads();
+    
+    console.log(`Syncing: Found ${editorMarks.length} thread marks and ${existingThreads.length} stored threads`);
+    
+    // Find threads that don't have corresponding marks in the document
+    const orphanedThreads = existingThreads.filter((thread: any) => 
+      !editorMarks.find(mark => mark.threadId === thread.id)
+    );
+
+    // Remove orphaned threads
+    orphanedThreads.forEach((thread: any) => {
+      console.log(`Removing orphaned thread: ${thread.id} (comments: ${thread.comments.length})`);
+      (this.editor.commands as any).removeThread?.({ id: thread.id });
+    });
+
+    if (orphanedThreads.length > 0) {
+      console.log(`Cleaned up ${orphanedThreads.length} orphaned threads`);
+      this.onSyncCallback?.();
+    }
+  }
+
+  /**
+   * Validate thread positions against current document content
+   * Remove threads where the marked text no longer exists or is invalid
+   */
+  validateThreadPositions(): void {
+    const provider = this.getProvider();
+    if (!provider) return;
+
     const { doc } = this.editor.state;
     const docSize = doc.content.size;
+    const editorMarks = this.getEditorThreadMarks();
     
-    const invalidComments = comments.filter(comment => {
-      const { from, to } = comment.position;
+    const threadsToRemove: string[] = [];
+    
+    editorMarks.forEach(mark => {
+      const { threadId, from, to } = mark;
       
       // Check if positions are beyond document bounds
       if (from > docSize || to > docSize || from < 0 || to < 0) {
-        console.log(`Comment ${comment.id} has out-of-bounds position: ${from}-${to} (docSize: ${docSize})`);
-        return true;
+        console.log(`Thread ${threadId} has out-of-bounds position: ${from}-${to} (docSize: ${docSize})`);
+        threadsToRemove.push(threadId);
+        return;
       }
       
       // Check if we can extract text at these positions
       try {
         const currentText = doc.textBetween(from, to);
         
-        // Only consider it invalid if the extraction completely fails
-        // OR if the text is completely empty (indicates deletion)
+        // If the text is completely empty, the content was likely deleted
         if (currentText.trim() === '') {
-          console.log(`Comment ${comment.id} has empty text at position ${from}-${to}, likely deleted`);
-          return true;
+          console.log(`Thread ${threadId} has empty text at position ${from}-${to}, content was deleted`);
+          threadsToRemove.push(threadId);
         }
         
-        // Don't validate exact text match here - rely on mark-based sync instead
-        return false;
-        
       } catch (error) {
-        // If we can't extract text at these positions, it's definitely invalid
-        console.log(`Cannot extract text for comment ${comment.id} at positions ${from}-${to}:`, error);
-        return true;
+        console.log(`Cannot extract text for thread ${threadId} at positions ${from}-${to}:`, error);
+        threadsToRemove.push(threadId);
       }
     });
 
-    // Remove invalid comments
-    invalidComments.forEach(comment => {
-      console.log(`Removing orphaned comment: ${comment.id} (position: ${comment.position.from}-${comment.position.to}, docSize: ${docSize})`);
-      commentStorage.deleteComment(comment.id);
+    // Remove invalid threads
+    threadsToRemove.forEach(threadId => {
+      console.log(`Removing thread with invalid position: ${threadId}`);
+      (this.editor.commands as any).removeThread?.({ id: threadId });
     });
 
-    if (invalidComments.length > 0) {
-      console.log(`Cleaned up ${invalidComments.length} orphaned comments`);
-    }
-  }
-
-  /**
-   * Synchronize comments with editor marks
-   * Remove comments that don't have corresponding marks
-   */
-  syncCommentsWithMarks(): void {
-    const editorMarks = this.getEditorCommentMarks();
-    const storedComments = commentStorage.getComments();
-    
-    console.log(`Syncing: Found ${editorMarks.length} editor marks and ${storedComments.length} stored comments`);
-    
-    // Find comments that don't have corresponding marks
-    const orphanedComments = storedComments.filter(comment => 
-      !editorMarks.find(mark => mark.commentId === comment.id)
-    );
-
-    // Remove orphaned comments
-    orphanedComments.forEach(comment => {
-      console.log(`Removing comment without mark: ${comment.id} (text: "${comment.selectedText}")`);
-      commentStorage.deleteComment(comment.id);
-    });
-
-    if (orphanedComments.length > 0) {
-      console.log(`Cleaned up ${orphanedComments.length} comments without marks`);
-    }
-  }
-
-  /**
-   * Full synchronization - prioritize mark-based sync over position validation
-   */
-  synchronize(): void {
-    console.log('=== Starting Comment Synchronization ===');
-    const initialCommentCount = commentStorage.getComments().length;
-    console.log(`Initial comment count: ${initialCommentCount}`);
-    
-    // Prioritize mark-based sync - this is more reliable
-    this.syncCommentsWithMarks();
-    
-    // Only do position validation if mark sync didn't change anything
-    const afterMarkSync = commentStorage.getComments().length;
-    if (afterMarkSync === initialCommentCount) {
-      console.log('No changes from mark sync, running position validation...');
-      this.validateCommentPositions();
-    } else {
-      console.log('Mark sync made changes, skipping position validation to avoid false positives');
-    }
-    
-    const finalCommentCount = commentStorage.getComments().length;
-    console.log(`Final comment count: ${finalCommentCount}`);
-    
-    // Notify if comments were cleaned up
-    if (initialCommentCount !== finalCommentCount) {
-      console.log(`Comments changed! Calling onSyncCallback...`);
+    if (threadsToRemove.length > 0) {
+      console.log(`Cleaned up ${threadsToRemove.length} threads with invalid positions`);
       this.onSyncCallback?.();
     }
-    console.log('=== Synchronization Complete ===');
+  }
+
+  /**
+   * Full synchronization using the new thread-based system
+   */
+  synchronize(): void {
+    console.log('=== Starting Thread Synchronization ===');
+    
+    const provider = this.getProvider();
+    if (!provider) {
+      console.log('No comments provider available, skipping sync');
+      return;
+    }
+    
+    const initialThreadCount = provider.getThreads().length;
+    console.log(`Initial thread count: ${initialThreadCount}`);
+    
+    // First, sync threads with marks - removes orphaned threads
+    this.syncThreadsWithMarks();
+    
+    // Then validate positions of remaining threads
+    this.validateThreadPositions();
+    
+    const finalThreadCount = provider.getThreads().length;
+    console.log(`Final thread count: ${finalThreadCount}`);
+    console.log('=== Thread Synchronization Complete ===');
   }
 
   /**

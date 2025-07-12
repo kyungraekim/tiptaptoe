@@ -17,7 +17,7 @@ import Link from '@tiptap/extension-link';
 
 // Plugins and utilities
 import { createChatPlugin } from '../plugins/ChatPlugin';
-import { CommentMark } from '../extensions/CommentMark';
+import { CommentsKit } from '@tiptaptoe/extension-comments';
 import { Comment } from '../types/comments';
 import { CommentSynchronizer } from '../utils/commentSynchronizer';
 
@@ -62,10 +62,31 @@ export const AppEditor = React.forwardRef<any, AppEditorProps>(
         Superscript,
         Subscript,
         Link.configure({ openOnClick: false }),
-        CommentMark,
+        CommentsKit.configure({
+          user: {
+            id: 'default-user',
+            name: 'User',
+            color: '#3b82f6'
+          },
+          onClickThread: (threadId: any) => {
+            console.log('Thread clicked:', threadId);
+          },
+          onCreateThread: (threadId: any) => {
+            console.log('Thread created:', threadId);
+          },
+          onDeleteThread: (threadId: any) => {
+            console.log('Thread deleted:', threadId);
+          },
+          onResolveThread: (threadId: any) => {
+            console.log('Thread resolved:', threadId);
+          },
+          onUpdateComment: (threadId: any, commentId: any, content: any, data: any) => {
+            console.log('Comment updated:', { threadId, commentId, content, data });
+          }
+        }),
       ],
       content: content || DEFAULT_CONTENT,
-      plugins: [createChatPlugin(onCommentsChange)],
+      plugins: [createChatPlugin(onCommentsChange, onCommentSync)],
     };
 
     // Set up synchronizer when editor is ready
@@ -82,9 +103,12 @@ export const AppEditor = React.forwardRef<any, AppEditorProps>(
         }
         
         // Add document change listener
-        const handleUpdate = () => {
-          console.log('Document update detected! Triggering synchronization...');
-          synchronizerRef.current?.debouncedSynchronize();
+        const handleUpdate = ({ transaction }: any) => {
+          // Only sync if the content actually changed (not just selection changes)
+          if (transaction.docChanged) {
+            console.log('Document content changed! Triggering synchronization...');
+            synchronizerRef.current?.debouncedSynchronize();
+          }
         };
         
         editor.on('update', handleUpdate);

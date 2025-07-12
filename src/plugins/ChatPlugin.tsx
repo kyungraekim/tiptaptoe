@@ -4,15 +4,17 @@ import { ChatBubble } from '../components/ChatBubble';
 import { ChatDialog } from '../components/ChatDialog';
 import { CommentPopover } from '../components/CommentPopover';
 import { useFileContext } from '../contexts/FileContextProvider';
-import { commentStorage } from '../utils/commentStorage';
+import { useThreads } from '@tiptaptoe/extension-comments';
 import { Comment } from '../types/comments';
+import { CommentHistory } from '../utils/commentHistory';
 
 interface ChatPluginComponentProps {
   editor: Editor;
   onCommentsChange?: (comments: Comment[]) => void;
+  onCommentAdded?: () => void;
 }
 
-export const ChatPluginComponent: React.FC<ChatPluginComponentProps> = ({ editor, onCommentsChange }) => {
+export const ChatPluginComponent: React.FC<ChatPluginComponentProps> = ({ editor, onCommentsChange, onCommentAdded }) => {
   const { availableFiles } = useFileContext();
   const [isChatDialogOpen, setIsChatDialogOpen] = useState(false);
   const [selectedTextForChat, setSelectedTextForChat] = useState('');
@@ -20,6 +22,16 @@ export const ChatPluginComponent: React.FC<ChatPluginComponentProps> = ({ editor
   const [commentPopoverPosition, setCommentPopoverPosition] = useState({ x: 0, y: 0 });
   const [selectedTextForComment, setSelectedTextForComment] = useState('');
   const [commentSelectionRange, setCommentSelectionRange] = useState({ from: 0, to: 0 });
+
+  // Use the new comments extension hook
+  const { addComment } = useThreads(
+    editor?.storage?.commentsKit?.provider,
+    editor,
+    { id: 'default-user', name: 'User', color: '#3b82f6' }
+  );
+
+  // Create comment history helper for undo/redo support
+  const commentHistory = editor ? new CommentHistory(editor) : null;
 
   const handleChatClick = (selectedText: string) => {
     setSelectedTextForChat(selectedText);
@@ -43,23 +55,65 @@ export const ChatPluginComponent: React.FC<ChatPluginComponentProps> = ({ editor
     setIsCommentPopoverOpen(true);
   };
 
-  const handleCommentSubmit = (content: string) => {
-    const newComment = commentStorage.addComment({
-      content,
-      selectedText: selectedTextForComment,
-      position: commentSelectionRange,
-    });
+  const currentUser = { id: 'default-user', name: 'User', color: '#3b82f6' };
+  
+  const handleCommentSubmit = (content: string, author?: { id: string; name: string; color: string }) => {
+    if (!commentHistory) return;
 
-    // Apply comment mark to the selected text
-    editor.chain()
-      .focus()
-      .setTextSelection(commentSelectionRange)
-      .setCommentMark({ commentId: newComment.id })
-      .run();
+    // Create thread with undo/redo support
+    const success = commentHistory.createThread();
+    
+    if (success) {
+      // Get the latest threads to find the newly created one
+      const latestThreads = editor?.storage?.commentsKit?.provider?.getThreads() || [];
+      const newThread = latestThreads[latestThreads.length - 1];
+      
+      if (newThread) {
+        // Add a comment to the thread with proper author information and undo/redo support
+        addComment(newThread.id, content, {
+          selectedText: selectedTextForComment,
+          position: commentSelectionRange,
+          author: author?.name || currentUser.name,
+        });
 
-    // Notify parent component about comments change
+        // Refresh the comments in the panel by converting all current threads
+        refreshCommentsFromProvider();
+        
+        // Notify parent that a comment was added
+        if (onCommentAdded) {
+          onCommentAdded();
+        }
+      }
+    }
+    
+    // Close the popover
+    setIsCommentPopoverOpen(false);
+  };
+
+  // Helper function to convert provider threads to Comment format and update state
+  const refreshCommentsFromProvider = () => {
+    if (!editor?.storage?.commentsKit?.provider) return;
+    
+    const provider = editor.storage.commentsKit.provider;
+    const threads = provider.getThreads();
+    
+    const convertedComments: Comment[] = threads.flatMap((thread: any) => 
+      thread.comments
+        .filter((comment: any) => !comment.deletedAt) // Filter out deleted comments
+        .map((comment: any) => ({
+          id: comment.id,
+          content: comment.content,
+          selectedText: comment.data?.selectedText || '',
+          position: comment.data?.position || { from: 0, to: 0 },
+          timestamp: comment.createdAt,
+          author: comment.data?.author || currentUser.name,
+          resolved: !!thread.resolvedAt,
+          threadId: thread.id
+        }))
+    );
+
     if (onCommentsChange) {
-      onCommentsChange(commentStorage.getComments());
+      onCommentsChange(convertedComments);
     }
   };
 
@@ -108,6 +162,7 @@ export const ChatPluginComponent: React.FC<ChatPluginComponentProps> = ({ editor
         selectedText={selectedTextForComment}
         onSubmit={handleCommentSubmit}
         onClose={() => setIsCommentPopoverOpen(false)}
+        author={currentUser}
       />
     </>
   );
@@ -120,9 +175,16 @@ export const chatPlugin = {
 };
 
 // Chat plugin factory function that accepts onCommentsChange
-export const createChatPlugin = (onCommentsChange?: (comments: Comment[]) => void) => ({
+export const createChatPlugin = (
+  onCommentsChange?: (comments: Comment[]) => void, 
+  onCommentAdded?: () => void
+) => ({
   name: 'chat',
   component: (props: { editor: Editor }) => (
-    <ChatPluginComponent editor={props.editor} onCommentsChange={onCommentsChange} />
+    <ChatPluginComponent 
+      editor={props.editor} 
+      onCommentsChange={onCommentsChange}
+      onCommentAdded={onCommentAdded}
+    />
   ),
 });

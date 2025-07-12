@@ -10,8 +10,9 @@ import { migrateOldSettings } from "./utils/settingsStorage";
 import { marked } from "marked";
 import { Button } from "./components/ui";
 import { Comment } from "./types/comments";
-import { commentStorage } from "./utils/commentStorage";
+import { CommentHistory } from "./utils/commentHistory";
 import "./utils/debugComments"; // Import debug utilities
+import "./utils/testCommentSystem"; // Import test utilities
 import "./App.css";
 import "./styles/comments.css";
 
@@ -24,9 +25,7 @@ function App() {
   // Migrate old settings on app start
   useEffect(() => {
     migrateOldSettings();
-    // Load comments
-    const loadedComments = commentStorage.getComments();
-    setComments(loadedComments);
+    // Comments will be loaded when the editor is ready through the ChatPlugin
   }, []);
 
   const handleContentChange = (newContent: string) => {
@@ -107,40 +106,70 @@ function App() {
   };
 
   const handleCommentUpdate = (commentId: string, content: string) => {
-    commentStorage.updateComment(commentId, content);
-    setComments(commentStorage.getComments());
+    const editor = editorRef.current;
+    if (!editor?.storage?.commentsKit?.provider) return;
+    
+    const commentHistory = new CommentHistory(editor);
+    const comment = comments.find(c => c.id === commentId);
+    
+    if (comment && comment.threadId) {
+      commentHistory.updateComment(comment.threadId, commentId, content);
+      
+      // Refresh the display
+      refreshCommentsFromProvider();
+    }
   };
 
   const handleCommentDelete = (commentId: string) => {
-    // Remove from storage
-    commentStorage.deleteComment(commentId);
+    const editor = editorRef.current;
+    if (!editor?.storage?.commentsKit?.provider) return;
     
-    // Remove comment mark from editor (Reactive Synchronization)
-    if (editorRef.current) {
-      const editor = editorRef.current;
-      editor.chain()
-        .focus()
-        .removeCommentMark(commentId)
-        .run();
+    const commentHistory = new CommentHistory(editor);
+    const comment = comments.find(c => c.id === commentId);
+    
+    if (comment && comment.threadId) {
+      const provider = editor.storage.commentsKit.provider;
+      const thread = provider.getThread(comment.threadId);
+      
+      if (thread) {
+        // If this is the only comment in the thread, remove the entire thread
+        const activeComments = thread.comments.filter((c: any) => !c.deletedAt);
+        if (activeComments.length === 1) {
+          commentHistory.deleteThread(comment.threadId);
+        } else {
+          // Otherwise just delete the comment
+          commentHistory.deleteComment(comment.threadId, commentId);
+        }
+        
+        // Refresh the display
+        refreshCommentsFromProvider();
+      }
     }
-    
-    // Update UI
-    setComments(commentStorage.getComments());
   };
 
   const handleCommentResolve = (commentId: string) => {
-    commentStorage.resolveComment(commentId);
-    setComments(commentStorage.getComments());
+    const editor = editorRef.current;
+    if (!editor?.storage?.commentsKit?.provider) return;
+    
+    const commentHistory = new CommentHistory(editor);
+    const comment = comments.find(c => c.id === commentId);
+    
+    if (comment && comment.threadId) {
+      commentHistory.resolveThread(comment.threadId);
+      
+      // Refresh the display
+      refreshCommentsFromProvider();
+    }
   };
 
   const handleCommentJump = (commentId: string) => {
+    const editor = editorRef.current;
+    if (!editor?.storage?.commentsKit?.provider) return;
+    
     const comment = comments.find(c => c.id === commentId);
-    if (comment && editorRef.current) {
-      const editor = editorRef.current;
-      editor.chain()
-        .focus()
-        .setTextSelection(comment.position)
-        .run();
+    if (comment && comment.threadId) {
+      // Select the thread to highlight it
+      editor.commands.selectThread({ id: comment.threadId });
     }
   };
 
@@ -148,10 +177,35 @@ function App() {
     setComments(newComments);
   };
 
+  // Refresh comments from the extension provider
+  const refreshCommentsFromProvider = () => {
+    const editor = editorRef.current;
+    if (!editor?.storage?.commentsKit?.provider) return;
+    
+    const provider = editor.storage.commentsKit.provider;
+    const threads = provider.getThreads();
+    
+    const convertedComments: Comment[] = threads.flatMap((thread: any) => 
+      thread.comments
+        .filter((comment: any) => !comment.deletedAt) // Filter out deleted comments
+        .map((comment: any) => ({
+          id: comment.id,
+          content: comment.content,
+          selectedText: comment.data?.selectedText || '',
+          position: comment.data?.position || { from: 0, to: 0 },
+          timestamp: comment.createdAt,
+          author: comment.data?.author || 'User',
+          resolved: !!thread.resolvedAt,
+          threadId: thread.id
+        }))
+    );
+
+    setComments(convertedComments);
+  };
+
   // Refresh comments from storage (for synchronization updates)
   const refreshComments = () => {
-    const updatedComments = commentStorage.getComments();
-    setComments(updatedComments);
+    refreshCommentsFromProvider();
   };
 
   return (
