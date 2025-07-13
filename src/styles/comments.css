@@ -1,3 +1,13 @@
+/* CSS Variables for consistent theming */
+:root {
+  --gray-2: #f3f4f6;
+  --gray-3: #d1d5db;
+  --gray-4: #9ca3af;
+  --gray-5: #6b7280;
+  --black: #000000;
+  --white: #ffffff;
+}
+
 /* New Comment Extension Styles */
 .comment-thread {
   background-color: #fef3c7 !important;
@@ -163,4 +173,110 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
+}
+
+/* Thread styles from SCSS reference */
+.thread {
+  border-radius: 0.5rem;
+  box-shadow: 0px 0px 0px 1px var(--gray-3) inset;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.65,0.05,0.36,1);
+}
+
+.thread:hover,
+.thread.is-active {
+  box-shadow: 0px 0px 0px 1px var(--gray-4) inset;
+}
+
+.thread.is-open {
+  box-shadow: 0px 0px 0px 1px var(--purple, #8b5cf6) inset;
+}
+
+.thread .header-group {
+  border-bottom: 1px solid var(--gray-3);
+  padding: 0.375rem 0.5rem;
+}
+
+.thread .header-group button {
+  background-color: unset;
+}
+
+.thread .header-group button:hover {
+  background-color: var(--gray-2);
+}
+
+.thread .comments-group {
+  display: flex;
+  flex-direction: column;
+  padding: 0.8rem;
+}
+
+.thread .comment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.thread .comment.deleted {
+  opacity: 0.5;
+}
+
+.thread .comment:not(:first-child) {
+  border-top: 1px solid var(--gray-3);
+  padding-top: 0.75rem;
+}
+
+.thread .comment:not(:last-child) {
+  padding-bottom: 0.75rem;
+}
+
+.thread .comment-edit {
+  padding: unset;
+}
+
+.thread .comment-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.thread .button-group {
+  gap: 0.125rem;
+}
+
+.thread .label-group {
+  column-gap: 0.25rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.thread .label-group label:not(:first-child)::before {
+  content: "·";
+  padding-right: 0.25rem;
+}
+
+.thread .label-group label:first-of-type {
+  font-weight: 700;
+  color: var(--black);
+}
+
+.thread button {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.375rem;
+  border-radius: 0.375rem;
+}
+
+.thread label {
+  color: var(--gray-5);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.thread p {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin: 0;
+  overflow: hidden;
 }

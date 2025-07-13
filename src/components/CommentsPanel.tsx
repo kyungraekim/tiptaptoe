@@ -58,55 +58,73 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
   return (
     <div
+      className={`thread ${comment.resolved ? 'resolved' : ''}`}
       style={{
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        padding: '12px',
-        marginBottom: '8px',
+        borderRadius: '0.5rem',
+        boxShadow: '0px 0px 0px 1px var(--gray-3, #d1d5db) inset',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.2s cubic-bezier(0.65,0.05,0.36,1)',
+        marginBottom: '0.5rem',
         backgroundColor: comment.resolved ? '#f9fafb' : 'white',
         opacity: comment.resolved ? 0.7 : 1,
       }}
     >
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'flex-start',
-        marginBottom: '8px' 
-      }}>
+      <div 
+        className="header-group"
+        style={{ 
+          borderBottom: '1px solid var(--gray-3, #d1d5db)',
+          padding: '0.375rem 0.5rem',
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-start'
+        }}
+      >
         <div style={{ flex: 1 }}>
-          <div style={{ 
-            fontSize: '12px', 
-            color: '#6b7280',
-            marginBottom: '4px',
-            fontWeight: '500'
-          }}>
-            {formatDate(comment.timestamp)}
+          <div 
+            className="label-group"
+            style={{ 
+              columnGap: '0.25rem',
+              display: 'flex',
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              marginBottom: '0.5rem'
+            }}
+          >
+            <label style={{ 
+              color: 'var(--black, #000)',
+              fontSize: '0.75rem',
+              fontWeight: 700
+            }}>
+              {formatDate(comment.timestamp)}
+            </label>
           </div>
-          <div style={{ 
-            fontSize: '11px', 
-            color: '#9ca3af',
-            backgroundColor: '#f3f4f6',
-            padding: '4px 6px',
-            borderRadius: '4px',
-            marginBottom: '8px',
-            fontFamily: 'monospace',
-            maxHeight: '40px',
+          <p style={{ 
+            fontSize: '0.75rem',
+            lineHeight: 1.4,
+            margin: 0,
             overflow: 'hidden',
-            wordBreak: 'break-word',
-            lineHeight: '1.3'
+            color: 'var(--gray-5, #6b7280)',
+            fontStyle: 'italic',
+            backgroundColor: '#f3f4f6',
+            padding: '0.25rem 0.5rem',
+            borderRadius: '0.25rem',
+            fontFamily: 'monospace'
           }}>
             "{comment.selectedText}"
-          </div>
+          </p>
         </div>
         
         <Button
           data-style="ghost"
           onClick={onJump}
           style={{ 
-            fontSize: '10px', 
-            padding: '4px 8px',
+            fontSize: '0.75rem', 
+            padding: '0.25rem 0.375rem',
+            borderRadius: '0.375rem',
             marginLeft: '8px',
-            color: '#6b7280'
+            backgroundColor: 'unset',
+            color: '#059669'
           }}
         >
           Jump to
@@ -114,94 +132,152 @@ const CommentItem: React.FC<CommentItemProps> = ({
       </div>
 
       {isEditing ? (
-        <div>
+        <div 
+          className="comment-edit"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.375rem',
+            padding: '0.2rem 0.8rem 0.8rem'
+          }}
+        >
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
             style={{
+              height: '4.5rem',
+              resize: 'none',
+              padding: '0.375rem 0.625rem',
+              lineHeight: 1.3,
               width: '100%',
-              minHeight: '60px',
-              padding: '6px',
               border: '1px solid #d1d5db',
               borderRadius: '4px',
-              fontSize: '13px',
+              fontSize: '0.75rem',
               fontFamily: 'inherit',
-              resize: 'vertical',
-              outline: 'none',
-              marginBottom: '8px',
+              outline: 'none'
             }}
             autoFocus
           />
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div 
+            className="flex-row"
+            style={{ 
+              display: 'flex',
+              columnGap: '0.5rem',
+              rowGap: '0.25rem'
+            }}
+          >
             <Button
               data-style="default"
               onClick={handleSave}
               disabled={!editContent.trim()}
-              style={{ fontSize: '11px', padding: '4px 8px' }}
+              style={{ 
+                fontSize: '0.75rem', 
+                padding: '0.25rem 0.375rem',
+                borderRadius: '0.375rem'
+              }}
             >
               Save
             </Button>
             <Button
               data-style="default"
               onClick={handleCancel}
-              style={{ fontSize: '11px', padding: '4px 8px' }}
+              style={{ 
+                fontSize: '0.75rem', 
+                padding: '0.25rem 0.375rem',
+                borderRadius: '0.375rem'
+              }}
             >
               Cancel
             </Button>
           </div>
         </div>
       ) : (
-        <div>
-          <div style={{ 
-            fontSize: '13px', 
-            color: '#374151',
-            marginBottom: '8px',
-            lineHeight: '1.4'
-          }}>
-            {comment.content}
-          </div>
-          <div style={{ 
-            display: 'flex', 
-            gap: '6px',
-            alignItems: 'center'
-          }}>
-            {!comment.resolved && (
-              <>
-                <Button
-                  data-style="ghost"
-                  onClick={() => setIsEditing(true)}
-                  style={{ 
-                    fontSize: '10px', 
-                    padding: '3px 6px',
-                    color: '#6b7280'
-                  }}
-                >
-                  Edit
-                </Button>
-                <Button
-                  data-style="ghost"
-                  onClick={onResolve}
-                  style={{ 
-                    fontSize: '10px', 
-                    padding: '3px 6px',
-                    color: '#059669'
-                  }}
-                >
-                  Resolve
-                </Button>
-              </>
-            )}
-            <Button
-              data-style="ghost"
-              onClick={onDelete}
-              style={{ 
-                fontSize: '10px', 
-                padding: '3px 6px',
-                color: '#dc2626'
+        <div 
+          className="comments-group"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '0.8rem'
+          }}
+        >
+          <div 
+            className="comment"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.125rem'
+            }}
+          >
+            <div 
+              className="comment-content"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.625rem'
               }}
             >
-              Delete
-            </Button>
+              <p style={{ 
+                fontSize: '0.75rem', 
+                lineHeight: 1.4,
+                margin: 0,
+                overflow: 'hidden',
+                color: '#374151'
+              }}>
+                {comment.content}
+              </p>
+              <div 
+                className="button-group"
+                style={{ 
+                  display: 'flex',
+                  gap: '0.125rem',
+                  alignItems: 'center'
+                }}
+              >
+                {!comment.resolved && (
+                  <>
+                    <Button
+                      data-style="ghost"
+                      onClick={() => setIsEditing(true)}
+                      style={{ 
+                        fontSize: '0.75rem', 
+                        padding: '0.25rem 0.375rem',
+                        borderRadius: '0.375rem',
+                        backgroundColor: 'unset',
+                        color: '#059669'
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      data-style="ghost"
+                      onClick={onResolve}
+                      style={{ 
+                        fontSize: '0.75rem', 
+                        padding: '0.25rem 0.375rem',
+                        borderRadius: '0.375rem',
+                        color: '#059669',
+                        backgroundColor: 'unset'
+                      }}
+                    >
+                      Resolve
+                    </Button>
+                  </>
+                )}
+                <Button
+                  data-style="ghost"
+                  onClick={onDelete}
+                  style={{ 
+                    fontSize: '0.75rem', 
+                    padding: '0.25rem 0.375rem',
+                    borderRadius: '0.375rem',
+                    color: '#dc2626',
+                    backgroundColor: 'unset'
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -226,96 +302,136 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({
   const activeCount = comments.filter(c => !c.resolved).length;
 
   return (
-    <div className="comments-panel" style={{
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
-      <div style={{
-        padding: '16px',
-        borderBottom: '1px solid #e5e7eb',
-        backgroundColor: 'white',
-      }}>
-        <div style={{
+    <div 
+      className="sidebar"
+      style={{
+        borderLeft: '1px solid var(--gray-3, #d1d5db)',
+        flexGrow: 0,
+        flexShrink: 0,
+        padding: '1rem',
+        width: '20rem',
+        position: 'sticky',
+        height: '100vh',
+        top: 0,
+        backgroundColor: 'white'
+      }}
+    >
+      <div 
+        className="sidebar-options"
+        style={{
+          alignItems: 'flex-start',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '12px',
-        }}>
-          <h3 style={{
-            margin: 0,
-            fontSize: '16px',
-            fontWeight: '600',
-            color: '#111827',
-          }}>
-            Comments
-          </h3>
-          <div style={{
-            fontSize: '11px',
-            color: '#6b7280',
-            backgroundColor: '#f3f4f6',
-            padding: '2px 6px',
-            borderRadius: '10px',
-          }}>
-            {activeCount} active
-          </div>
-        </div>
-        
-        {resolvedCount > 0 && (
+          flexDirection: 'column',
+          height: '100%',
+          gap: '1rem',
+          position: 'sticky',
+          top: '1rem'
+        }}
+      >
+        <div 
+          className="option-group"
+          style={{
+            alignItems: 'flex-start',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.625rem',
+            width: '100%',
+            paddingBottom: '1rem',
+            borderBottom: '1px solid var(--gray-3, #d1d5db)'
+          }}
+        >
           <div style={{
             display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '8px',
+            width: '100%',
+            marginBottom: '0.75rem'
           }}>
-            <label style={{
+            <h3 style={{
+              margin: 0,
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: 'var(--black, #000)'
+            }}>
+              Comments
+            </h3>
+            <div style={{
+              fontSize: '0.75rem',
+              color: 'var(--gray-5, #6b7280)',
+              backgroundColor: 'var(--gray-2, #f3f4f6)',
+              padding: '0.125rem 0.375rem',
+              borderRadius: '0.625rem'
+            }}>
+              {activeCount} active
+            </div>
+          </div>
+          
+          {resolvedCount > 0 && (
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '4px',
-              fontSize: '12px',
-              color: '#6b7280',
-              cursor: 'pointer',
+              gap: '0.5rem'
             }}>
-              <input
-                type="checkbox"
-                checked={showResolved}
-                onChange={(e) => setShowResolved(e.target.checked)}
-                style={{ margin: 0 }}
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                fontSize: '0.75rem',
+                color: 'var(--gray-5, #6b7280)',
+                cursor: 'pointer',
+                fontWeight: 400
+              }}>
+                <input
+                  type="checkbox"
+                  checked={showResolved}
+                  onChange={(e) => setShowResolved(e.target.checked)}
+                  style={{ margin: 0 }}
+                />
+                Show resolved ({resolvedCount})
+              </label>
+            </div>
+          )}
+        </div>
+        
+        <div 
+          className="threads-group"
+          style={{
+            alignSelf: 'stretch',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+            margin: '0 -1rem',
+            overflow: 'auto',
+            padding: '0 1rem',
+            flex: 1
+          }}
+        >
+          {visibleComments.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              color: 'var(--gray-5, #9ca3af)',
+              fontSize: '0.875rem',
+              marginTop: '2.5rem',
+              padding: '1rem'
+            }}>
+              {comments.length === 0 
+                ? 'No comments yet. Right-click on selected text to add a comment.' 
+                : 'No active comments. Toggle "Show resolved" to see resolved comments.'
+              }
+            </div>
+          ) : (
+            visibleComments.map((comment) => (
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                onUpdate={(content) => onCommentUpdate(comment.id, content)}
+                onDelete={() => onCommentDelete(comment.id)}
+                onResolve={() => onCommentResolve(comment.id)}
+                onJump={() => onCommentJump(comment.id)}
               />
-              Show resolved ({resolvedCount})
-            </label>
-          </div>
-        )}
-      </div>
-
-      <div style={{
-        flex: 1,
-        overflow: 'auto',
-        padding: '12px',
-      }}>
-        {visibleComments.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            color: '#9ca3af',
-            fontSize: '14px',
-            marginTop: '40px',
-          }}>
-            {comments.length === 0 
-              ? 'No comments yet. Right-click on selected text to add a comment.' 
-              : 'No active comments. Toggle "Show resolved" to see resolved comments.'
-            }
-          </div>
-        ) : (
-          visibleComments.map((comment) => (
-            <CommentItem
-              key={comment.id}
-              comment={comment}
-              onUpdate={(content) => onCommentUpdate(comment.id, content)}
-              onDelete={() => onCommentDelete(comment.id)}
-              onResolve={() => onCommentResolve(comment.id)}
-              onJump={() => onCommentJump(comment.id)}
-            />
-          ))
-        )}
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
