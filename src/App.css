@@ -21,6 +21,13 @@
   -webkit-text-size-adjust: 100%;
 }
 
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 .container {
   margin: 0;
   padding-top: 10vh;
@@ -118,4 +125,38 @@ button {
 /* Minimal editor improvements to avoid toolbar issues */
 .simple-editor {
   height: 100%;
+}
+
+/* Fixed header and scrollable content layout */
+.app-container {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    background: #2f2f2f;
+  }
+}
+
+.app-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-container {
+  flex: 1;
+  overflow: hidden;
 }

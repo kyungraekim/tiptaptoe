@@ -219,22 +219,17 @@ function App() {
 
   return (
     <FileContextProvider>
-      <div style={{
+      <div className="app-container" style={{
         fontFamily: "system-ui, -apple-system, sans-serif"
       }}>
-        <div style={{
-          margin: "0 auto",
-          padding: "20px",
+        {/* Header section */}
+        <header className="app-header" style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "16px 20px",
+          borderBottom: "1px solid #e5e7eb"
         }}>
-          {/* Header section */}
-          <header style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "20px",
-            padding: "16px 0",
-            borderBottom: "1px solid #e5e7eb"
-          }}>
             <div>
               <h1 style={{ margin: "0 0 5px 0", fontSize: "1.875rem", fontWeight: "700" }}>
                 Tiptap Rich Text Editor
@@ -257,8 +252,10 @@ function App() {
               <GenerateButton onSummaryGenerated={handleSummaryGenerated} />
               <SettingsIcon />
             </div>
-          </header>
+        </header>
 
+        {/* Content section */}
+        <div className="app-content">
           {savedMessage && (
             <div style={{
               padding: "12px 16px",
@@ -267,22 +264,22 @@ function App() {
               borderRadius: "6px",
               color: "#0c4a6e",
               fontSize: "14px",
-              marginBottom: "16px"
+              margin: "16px 20px 0 20px"
             }}>
               {savedMessage}
             </div>
           )}
-      </div>
-      {/* Editor section - full width  */}
-      <div style={{
-        border: "2px solid #e5e7eb",
-        borderRadius: "8px",
-        backgroundColor: "white",
-        overflow: "hidden",
-        display: "flex",
-        minHeight: "600px",
-        margin: "0 20px"
-      }}>
+          
+          {/* Editor section */}
+          <div className="editor-container" style={{
+            border: "2px solid #e5e7eb",
+            borderRadius: "8px",
+            backgroundColor: "white",
+            overflow: "hidden",
+            display: "flex",
+            margin: "16px 20px",
+            flex: 1
+          }}>
         <div style={{ 
           flex: 1, 
           display: "flex", 
@@ -303,26 +300,28 @@ function App() {
           onCommentDelete={handleCommentDelete}
           onCommentResolve={handleCommentResolve}
           onCommentJump={handleCommentJump}
-        />
-      </div>
-      {/* Footer section */}
-      <footer style={{
-        marginTop: "20px",
-        padding: "16px",
-        backgroundColor: "#f9fafb",
-        borderRadius: "6px",
-        fontSize: "12px",
-        color: "#6b7280",
-        textAlign: "center"
-      }}>
-        <p style={{ margin: 0 }}>
-          <strong>PDF Summarization:</strong> Click the <strong>Generate</strong> button to upload a PDF and generate an AI summary.
-          <br />
-          <strong>AI Chat Assistant:</strong> Select any text in the editor and click the chat icon to get AI help with your content.
-          <br />
-          Use the <strong>⚙️ Settings</strong> icon to configure your AI provider and preferences.
-        </p>
-      </footer>
+            />
+          </div>
+          
+          {/* Footer section */}
+          <footer style={{
+            padding: "16px 20px",
+            backgroundColor: "#f9fafb",
+            borderRadius: "6px",
+            fontSize: "12px",
+            color: "#6b7280",
+            textAlign: "center",
+            margin: "16px 20px 20px 20px"
+          }}>
+            <p style={{ margin: 0 }}>
+              <strong>PDF Summarization:</strong> Click the <strong>Generate</strong> button to upload a PDF and generate an AI summary.
+              <br />
+              <strong>AI Chat Assistant:</strong> Select any text in the editor and click the chat icon to get AI help with your content.
+              <br />
+              Use the <strong>⚙️ Settings</strong> icon to configure your AI provider and preferences.
+            </p>
+          </footer>
+        </div>
       </div>
     </FileContextProvider>
   );
