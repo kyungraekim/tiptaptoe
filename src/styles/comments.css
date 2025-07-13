@@ -61,15 +61,6 @@
   transition: all 0.2s ease;
 }
 
-/* Comments panel responsive design */
-.comments-panel {
-  border-left: 1px solid #e5e7eb;
-  background-color: #fafafa;
-  min-width: 320px;
-  max-width: 400px;
-  width: 320px;
-  flex-shrink: 0;
-}
 
 /* Selection indicator for commenting */
 .ProseMirror-selectednode {
@@ -113,31 +104,6 @@
   z-index: 1000;
 }
 
-.comments-panel {
-  border-left: 1px solid #e5e7eb;
-  background-color: #fafafa;
-}
-
-.comments-panel .comment-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background-color: white;
-  transition: all 0.2s ease;
-}
-
-.comments-panel .comment-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.comments-panel .comment-item.resolved {
-  background-color: #f9fafb;
-  opacity: 0.7;
-}
-
-.comments-panel .comment-item.resolved .comment-content {
-  text-decoration: line-through;
-  color: #6b7280;
-}
 
 .magic-wand-button {
   position: relative;
@@ -189,22 +155,12 @@
   box-shadow: 0px 0px 0px 1px var(--gray-4) inset;
 }
 
-.thread.is-open {
-  box-shadow: 0px 0px 0px 1px var(--purple, #8b5cf6) inset;
-}
 
 .thread .header-group {
   border-bottom: 1px solid var(--gray-3);
   padding: 0.375rem 0.5rem;
 }
 
-.thread .header-group button {
-  background-color: unset;
-}
-
-.thread .header-group button:hover {
-  background-color: var(--gray-2);
-}
 
 .thread .comments-group {
   display: flex;
@@ -218,18 +174,6 @@
   gap: 0.125rem;
 }
 
-.thread .comment.deleted {
-  opacity: 0.5;
-}
-
-.thread .comment:not(:first-child) {
-  border-top: 1px solid var(--gray-3);
-  padding-top: 0.75rem;
-}
-
-.thread .comment:not(:last-child) {
-  padding-bottom: 0.75rem;
-}
 
 .thread .comment-edit {
   padding: unset;
@@ -250,11 +194,6 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-}
-
-.thread .label-group label:not(:first-child)::before {
-  content: "·";
-  padding-right: 0.25rem;
 }
 
 .thread .label-group label:first-of-type {
