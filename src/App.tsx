@@ -164,12 +164,21 @@ function App() {
 
   const handleCommentJump = (commentId: string) => {
     const editor = editorRef.current;
-    if (!editor?.storage?.commentsKit?.provider) return;
+    if (!editor) return;
     
     const comment = comments.find(c => c.id === commentId);
-    if (comment && comment.threadId) {
-      // Select the thread to highlight it
-      editor.commands.selectThread({ id: comment.threadId });
+    if (comment && comment.position) {
+      // Move cursor to the start of the comment's position (no selection)
+      editor.commands.setTextSelection(comment.position.from);
+      
+      // Highlight the thread if available
+      if (comment.threadId && editor.storage?.commentsKit?.provider) {
+        editor.commands.selectThread({ id: comment.threadId });
+      }
+      
+      // Focus the editor and scroll the cursor into view
+      editor.commands.focus();
+      editor.commands.scrollIntoView();
     }
   };
 
