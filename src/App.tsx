@@ -268,8 +268,7 @@ function App() {
         backgroundColor: "white",
         overflow: "hidden",
         display: "flex",
-        minHeight: "600px",
-        maxHeight: "80vh"
+        minHeight: "600px"
       }}>
         <div style={{ 
           flex: 1, 
