@@ -220,64 +220,68 @@ function App() {
   return (
     <FileContextProvider>
       <div style={{
-        maxWidth: "1200px",
-        margin: "0 auto",
-        padding: "20px",
         fontFamily: "system-ui, -apple-system, sans-serif"
       }}>
-      <header style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "20px",
-        padding: "16px 0",
-        borderBottom: "1px solid #e5e7eb"
-      }}>
-        <div>
-          <h1 style={{ margin: "0 0 5px 0", fontSize: "1.875rem", fontWeight: "700" }}>
-            Tiptap Rich Text Editor
-          </h1>
-          <p style={{ margin: 0, color: "#666", fontSize: "0.875rem" }}>
-            A powerful rich text editor with AI-powered PDF summarization
-          </p>
-        </div>
-
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <Button variant="secondary" onClick={newDocument}>
-            New
-          </Button>
-          <Button variant="secondary" onClick={loadDocument}>
-            Load
-          </Button>
-          <Button variant="primary" onClick={saveDocument}>
-            Save
-          </Button>
-          <GenerateButton onSummaryGenerated={handleSummaryGenerated} />
-          <SettingsIcon />
-        </div>
-      </header>
-
-      {savedMessage && (
         <div style={{
-          padding: "12px 16px",
-          backgroundColor: "#f0f9ff",
-          border: "1px solid #0ea5e9",
-          borderRadius: "6px",
-          color: "#0c4a6e",
-          fontSize: "14px",
-          marginBottom: "16px"
+          margin: "0 auto",
+          padding: "20px",
         }}>
-          {savedMessage}
-        </div>
-      )}
+          {/* Header section */}
+          <header style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+            padding: "16px 0",
+            borderBottom: "1px solid #e5e7eb"
+          }}>
+            <div>
+              <h1 style={{ margin: "0 0 5px 0", fontSize: "1.875rem", fontWeight: "700" }}>
+                Tiptap Rich Text Editor
+              </h1>
+              <p style={{ margin: 0, color: "#666", fontSize: "0.875rem" }}>
+                A powerful rich text editor with AI-powered PDF summarization
+              </p>
+            </div>
 
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <Button variant="secondary" onClick={newDocument}>
+                New
+              </Button>
+              <Button variant="secondary" onClick={loadDocument}>
+                Load
+              </Button>
+              <Button variant="primary" onClick={saveDocument}>
+                Save
+              </Button>
+              <GenerateButton onSummaryGenerated={handleSummaryGenerated} />
+              <SettingsIcon />
+            </div>
+          </header>
+
+          {savedMessage && (
+            <div style={{
+              padding: "12px 16px",
+              backgroundColor: "#f0f9ff",
+              border: "1px solid #0ea5e9",
+              borderRadius: "6px",
+              color: "#0c4a6e",
+              fontSize: "14px",
+              marginBottom: "16px"
+            }}>
+              {savedMessage}
+            </div>
+          )}
+      </div>
+      {/* Editor section - full width  */}
       <div style={{
         border: "2px solid #e5e7eb",
         borderRadius: "8px",
         backgroundColor: "white",
         overflow: "hidden",
         display: "flex",
-        minHeight: "600px"
+        minHeight: "600px",
+        margin: "0 20px"
       }}>
         <div style={{ 
           flex: 1, 
@@ -301,7 +305,7 @@ function App() {
           onCommentJump={handleCommentJump}
         />
       </div>
-
+      {/* Footer section */}
       <footer style={{
         marginTop: "20px",
         padding: "16px",
