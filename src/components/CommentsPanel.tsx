@@ -27,6 +27,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleSave = () => {
     if (editContent.trim()) {
@@ -59,6 +60,8 @@ const CommentItem: React.FC<CommentItemProps> = ({
   return (
     <div
       className={`thread ${comment.resolved ? 'resolved' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         borderRadius: '0.5rem',
         boxShadow: '0px 0px 0px 1px var(--gray-3, #d1d5db) inset',
@@ -114,21 +117,6 @@ const CommentItem: React.FC<CommentItemProps> = ({
             "{comment.selectedText}"
           </p>
         </div>
-        
-        <Button
-          data-style="ghost"
-          onClick={onJump}
-          style={{ 
-            fontSize: '0.75rem', 
-            padding: '0.25rem 0.375rem',
-            borderRadius: '0.375rem',
-            marginLeft: '8px',
-            backgroundColor: 'unset',
-            color: '#059669'
-          }}
-        >
-          Jump to
-        </Button>
       </div>
 
       {isEditing ? (
@@ -225,58 +213,73 @@ const CommentItem: React.FC<CommentItemProps> = ({
               }}>
                 {comment.content}
               </p>
-              <div 
-                className="button-group"
-                style={{ 
-                  display: 'flex',
-                  gap: '0.125rem',
-                  alignItems: 'center'
-                }}
-              >
-                {!comment.resolved && (
-                  <>
-                    <Button
-                      data-style="ghost"
-                      onClick={() => setIsEditing(true)}
-                      style={{ 
-                        fontSize: '0.75rem', 
-                        padding: '0.25rem 0.375rem',
-                        borderRadius: '0.375rem',
-                        backgroundColor: 'unset',
-                        color: '#059669'
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      data-style="ghost"
-                      onClick={onResolve}
-                      style={{ 
-                        fontSize: '0.75rem', 
-                        padding: '0.25rem 0.375rem',
-                        borderRadius: '0.375rem',
-                        color: '#059669',
-                        backgroundColor: 'unset'
-                      }}
-                    >
-                      Resolve
-                    </Button>
-                  </>
-                )}
-                <Button
-                  data-style="ghost"
-                  onClick={onDelete}
+              {isHovered && (
+                <div 
+                  className="button-group"
                   style={{ 
-                    fontSize: '0.75rem', 
-                    padding: '0.25rem 0.375rem',
-                    borderRadius: '0.375rem',
-                    color: '#dc2626',
-                    backgroundColor: 'unset'
+                    display: 'flex',
+                    gap: '0.125rem',
+                    alignItems: 'center'
                   }}
                 >
-                  Delete
-                </Button>
-              </div>
+                  <Button
+                    data-style="ghost"
+                    onClick={onJump}
+                    style={{ 
+                      fontSize: '0.75rem', 
+                      padding: '0.25rem 0.375rem',
+                      borderRadius: '0.375rem',
+                      backgroundColor: 'unset',
+                      color: '#059669'
+                    }}
+                  >
+                    Jump to
+                  </Button>
+                  {!comment.resolved && (
+                    <>
+                      <Button
+                        data-style="ghost"
+                        onClick={() => setIsEditing(true)}
+                        style={{ 
+                          fontSize: '0.75rem', 
+                          padding: '0.25rem 0.375rem',
+                          borderRadius: '0.375rem',
+                          backgroundColor: 'unset',
+                          color: '#059669'
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        data-style="ghost"
+                        onClick={onResolve}
+                        style={{ 
+                          fontSize: '0.75rem', 
+                          padding: '0.25rem 0.375rem',
+                          borderRadius: '0.375rem',
+                          color: '#059669',
+                          backgroundColor: 'unset'
+                        }}
+                      >
+                        Resolve
+                      </Button>
+                    </>
+                  )}
+                  <Button
+                    data-style="ghost"
+                    onClick={onDelete}
+                    style={{ 
+                      fontSize: '0.75rem', 
+                      padding: '0.25rem 0.375rem',
+                      borderRadius: '0.375rem',
+                      color: '#dc2626',
+                      backgroundColor: 'unset'
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
