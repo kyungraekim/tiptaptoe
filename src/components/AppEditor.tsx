@@ -110,9 +110,21 @@ export const AppEditor = React.forwardRef<any, AppEditorProps>(
             const oldSize = transaction.before.content.size;
             const newSize = transaction.doc.content.size;
             
-            // Only sync when content was deleted (document got smaller)
-            // This prevents unnecessary synchronization on typing, formatting, etc.
-            if (newSize < oldSize) {
+            // Check if this is an undo/redo operation
+            const isUndo = transaction.getMeta('isUndo') || 
+                         transaction.getMeta('uiEvent') === 'undo' ||
+                         transaction.getMeta('addToHistory') === false;
+            const isRedo = transaction.getMeta('isRedo') || 
+                         transaction.getMeta('uiEvent') === 'redo';
+            const historyMeta = transaction.getMeta('history$');
+            const isHistoryOperation = historyMeta && (historyMeta.undo || historyMeta.redo);
+            
+            if (isUndo || isRedo || isHistoryOperation) {
+              console.log(`Detected ${isUndo || historyMeta?.undo ? 'undo' : 'redo'} operation, triggering synchronization to restore comments...`);
+              synchronizerRef.current?.debouncedSynchronize();
+            } else if (newSize < oldSize) {
+              // Only sync when content was deleted (document got smaller)
+              // This prevents unnecessary synchronization on typing, formatting, etc.
               console.log('Content deleted! Triggering synchronization...');
               synchronizerRef.current?.debouncedSynchronize();
             }

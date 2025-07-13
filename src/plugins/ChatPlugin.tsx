@@ -76,6 +76,25 @@ export const ChatPluginComponent: React.FC<ChatPluginComponentProps> = ({ editor
           author: author?.name || currentUser.name,
         });
 
+        // Save comment data to individual localStorage key for undo/redo restoration
+        try {
+          const commentData = {
+            id: newThread.id,
+            threadId: newThread.id,
+            content: content,
+            selectedText: selectedTextForComment,
+            position: commentSelectionRange,
+            author: author?.name || currentUser.name,
+            timestamp: new Date(),
+            resolved: false
+          };
+          const individualKey = `comment-${newThread.id}`;
+          localStorage.setItem(individualKey, JSON.stringify(commentData));
+          console.log(`Saved new comment data to individual key: ${individualKey}`);
+        } catch (error) {
+          console.error('Error saving comment to individual localStorage:', error);
+        }
+
         // Refresh the comments in the panel by converting all current threads
         refreshCommentsFromProvider();
         
