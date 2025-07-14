@@ -17,10 +17,17 @@ npm run tauri dev    # Start Tauri development mode
 npm run tauri build  # Build Tauri application
 ```
 
+**Testing:**
+```bash
+npm test             # Run tests with vitest
+npm run test:ui      # Run tests with UI interface
+npm run test:coverage # Run tests with coverage report
+```
+
 **TypeScript:**
 - Uses strict mode with full linting enabled
 - Configuration in `tsconfig.json` with ES2020 target
-- No explicit lint/typecheck commands found - verify these before committing changes
+- Uses vitest + @testing-library/react for component testing
 
 ## Architecture Overview
 
@@ -28,19 +35,22 @@ npm run tauri build  # Build Tauri application
 
 ### Frontend Architecture (React + TypeScript + Vite)
 - **Rich Text Editor**: Built with TipTap.js, offering comprehensive formatting options
-- **AI Integration**: Two AI features:
+- **AI Integration**: Three AI features:
   - PDF summarization via `GenerateButton`
   - Interactive chat assistant via text selection + chat bubble
+  - Comment system with AI-powered analysis and threading
 - **Settings System**: Configurable AI provider settings stored locally
 - **Modular Component Libraries**:
   - `@tiptaptoe/ui-components`: Reusable UI primitives and icons
   - `@tiptaptoe/tiptap-toolbar`: Complete TipTap toolbar component library
   - `@tiptaptoe/tiptap-editor`: Configurable TipTap editor with plugin system
+  - `@tiptaptoe/extension-comments`: Transaction-based commenting system with threading
 - **Component Structure**:
   - `SimpleEditor`: Main TipTap editor with toolbar
   - `ChatBubble` + `ChatDialog`: AI chat interface
   - `GenerateButton`: PDF upload and AI summarization
   - `SettingsModal`: AI configuration interface
+  - `TransactionCommentManager`: Comment system with undo/redo support
 
 ### Backend Architecture (Rust + Tauri)
 - **AI Client** (`ai_client.rs`): OpenAI-compatible API client with error handling
@@ -65,6 +75,15 @@ npm run tauri build  # Build Tauri application
 - Both PDF summarization and chat use the same `OpenAIClient` with configurable base URLs
 - Chat responses can be applied as "replace" or "append" actions in the editor
 - AI settings are stored and migrated through `settingsStorage.ts`
+- Comment system integrates with AI workflows for document analysis and revision
+
+### Comment System
+- **Transaction-based Architecture**: Comments are stored in TipTap's transaction metadata for proper undo/redo support
+- **Thread Management**: Comments are organized into threaded conversations with visual highlighting
+- **Persistence Strategy**: LocalStorage backup ensures comment recovery after undo/redo operations
+- **AI Integration**: Comments can be included in AI workflows via `getDocumentWithComments()` and `applyAIRevision()`
+- **Visual Feedback**: Comment marks create visual indicators in the editor with thread-based highlighting
+- **Synchronization**: Provider-based system keeps comments in sync across different UI components
 
 ### Editor Integration
 - Editor ref is exposed for external content manipulation (AI responses)
@@ -96,7 +115,19 @@ Complete TipTap toolbar component library:
 - **UI**: ThemeToggle
 - **Hooks**: useCursorVisibility
 
-Both libraries are built with TypeScript, include full type definitions, and maintain compatibility with the main Tauri application.
+### @tiptaptoe/extension-comments
+Transaction-based commenting system with comprehensive features:
+- **Comment Management**: Create, update, delete, and resolve comments
+- **Threading**: Group related comments into threaded conversations
+- **Transaction Integration**: Comments are stored in TipTap's transaction system for undo/redo support
+- **Visual Highlighting**: Comment marks with thread-based visual indicators
+- **Persistence**: LocalStorage backup for comment recovery after undo/redo operations
+- **AI Integration**: Comments can be analyzed and processed by AI workflows
+- **Synchronization**: Provider-based system for real-time comment updates
+- **Navigation**: Jump to comment positions, filter by status (active/resolved)
+- **Classes**: `TransactionCommentManager` for all comment operations
+
+All libraries are built with TypeScript, include full type definitions, and maintain compatibility with the main Tauri application.
 
 # Using Gemini CLI for Large Codebase Analysis
 
