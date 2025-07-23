@@ -1,0 +1,167 @@
+/* AI React Components Styles */
+
+.chat-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.chat-dialog {
+  background-color: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  height: 80%;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.selection-bubble {
+  position: absolute;
+  z-index: 1000;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 20px;
+  padding: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  user-select: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.selection-bubble button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.selection-bubble button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Settings Modal Styles */
+.settings-modal {
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.settings-field {
+  margin-bottom: 16px;
+}
+
+.settings-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Connection Status Styles */
+.connection-status {
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.connection-status.success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.connection-status.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.connection-status.testing {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+/* File Context Panel Styles */
+.file-context-panel {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 20px;
+  background-color: #f9fafb;
+}
+
+.file-context-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.file-context-item:last-child {
+  margin-bottom: 0;
+}
+
+.file-context-item.selected {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.file-context-item.used {
+  opacity: 0.6;
+  background-color: #f3f4f6;
+}
+
+/* Generate Button Styles */
+.generate-button-container {
+  position: relative;
+}
+
+.generate-button-status {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+}

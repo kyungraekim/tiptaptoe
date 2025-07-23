@@ -1,0 +1,45 @@
+{
+  "name": "@tiptaptoe/ai-core",
+  "version": "1.0.0",
+  "description": "Core AI functionality and LLM client for TipTapToe applications",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3",
+    "vite-plugin-dts": "^4.3.0"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "openai",
+    "claude",
+    "pdf",
+    "chat",
+    "tauri",
+    "tiptap"
+  ],
+  "author": "TipTapToe",
+  "license": "MIT"
+}

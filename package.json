@@ -29,6 +29,8 @@
     "@tiptap/extension-underline": "^2.26.1",
     "@tiptap/react": "^2.26.1",
     "@tiptap/starter-kit": "^2.26.1",
+    "@tiptaptoe/ai-core": "file:packages/@tiptaptoe/ai-core",
+    "@tiptaptoe/ai-react": "file:packages/@tiptaptoe/ai-react",
     "@tiptaptoe/extension-comments": "file:./packages/@tiptaptoe/extension-comments",
     "@tiptaptoe/tiptap-editor": "file:./packages/@tiptaptoe/tiptap-editor",
     "@tiptaptoe/tiptap-toolbar": "file:./packages/@tiptaptoe/tiptap-toolbar",
