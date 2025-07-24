@@ -8,7 +8,7 @@ A modern desktop rich text editor built with Tauri, React, and TypeScript, featu
 - **AI Integration**: PDF summarization, interactive chat, and AI-powered comment analysis
 - **Comment System**: Transaction-based commenting with threading and visual highlighting
 - **Cross-Platform**: Desktop application for Windows, macOS, and Linux
-- **Modular Architecture**: Four specialized component libraries for maximum reusability
+- **Modular Architecture**: Six specialized component libraries for maximum reusability
 
 ## Architecture
 
@@ -30,10 +30,7 @@ A modern desktop rich text editor built with Tauri, React, and TypeScript, featu
 ```
 tiptaptoe/
 ├── src/                          # Frontend React application
-│   ├── components/               # UI components
-│   │   ├── chat/                # Chat interface components
-│   │   ├── settings/            # Settings modal components
-│   │   └── ui/                  # Reusable UI primitives
+│   ├── components/               # Main UI components
 │   ├── contexts/                # React contexts
 │   ├── hooks/                   # Custom React hooks
 │   ├── types/                   # TypeScript type definitions
@@ -41,10 +38,12 @@ tiptaptoe/
 │   └── styles/                  # CSS styles and themes
 ├── src-tauri/                   # Rust backend
 │   ├── src/commands/            # Tauri command handlers
-│   ├── src/llm/                 # AI client implementations
+│   ├── src/llm/                 # AI client implementations (OpenAI, Claude)
 │   └── src/pdf/                 # PDF processing modules
 └── packages/                    # Modular component libraries
     └── @tiptaptoe/
+        ├── ai-core/             # Core AI functionality and LLM clients
+        ├── ai-react/            # React AI components and hooks
         ├── ui-components/       # Base UI components and icons
         ├── tiptap-toolbar/      # TipTap toolbar components
         ├── tiptap-editor/       # Configurable editor component
@@ -52,6 +51,22 @@ tiptaptoe/
 ```
 
 ## Component Libraries
+
+### @tiptaptoe/ai-core
+Core AI functionality and LLM client implementations:
+- **LLM Clients**: OpenAI and Claude API clients with unified interface
+- **PDF Processing**: Text extraction and document analysis
+- **Settings Management**: AI provider configuration and storage
+- **Error Handling**: Comprehensive error management for AI operations
+- **Factory Pattern**: Unified client creation for different AI providers
+
+### @tiptaptoe/ai-react
+React components and hooks for AI integration:
+- **Chat Components**: ChatDialog, ChatBubble, ChatMessage components
+- **Settings UI**: AI configuration modal and connection testing
+- **File Context**: PDF upload and document context management
+- **Hooks**: useAISettings, useChat for AI state management
+- **Generate Button**: PDF summarization and AI content generation
 
 ### @tiptaptoe/ui-components
 Base UI primitives and utilities:
@@ -99,17 +114,48 @@ git clone <repository-url>
 cd tiptaptoe
 ```
 
-2. Install dependencies:
+2. Install root dependencies:
 ```bash
 npm install
 ```
 
-3. Install Tauri CLI:
+3. Install package dependencies:
+```bash
+# Install dependencies for all packages
+cd packages/@tiptaptoe/ai-core && npm install && cd ../../../
+cd packages/@tiptaptoe/ai-react && npm install && cd ../../../
+cd packages/@tiptaptoe/ui-components && npm install && cd ../../../
+cd packages/@tiptaptoe/tiptap-toolbar && npm install && cd ../../../
+cd packages/@tiptaptoe/tiptap-editor && npm install && cd ../../../
+cd packages/@tiptaptoe/extension-comments && npm install && cd ../../../
+```
+
+4. Build packages (required before running the main application):
+```bash
+# Build all packages in dependency order
+cd packages/@tiptaptoe/ui-components && npm run build && cd ../../../
+cd packages/@tiptaptoe/tiptap-toolbar && npm run build && cd ../../../
+cd packages/@tiptaptoe/tiptap-editor && npm run build && cd ../../../
+cd packages/@tiptaptoe/extension-comments && npm run build && cd ../../../
+cd packages/@tiptaptoe/ai-core && npm run build && cd ../../../
+cd packages/@tiptaptoe/ai-react && npm run build && cd ../../../
+```
+
+5. Install Tauri CLI (if not already installed):
 ```bash
 npm install --save-dev @tauri-apps/cli
 ```
 
 ### Development Commands
+
+**Package Development:**
+```bash
+# Watch mode for package development (run in package directory)
+npm run dev          # Build package in watch mode
+
+# Build packages (run in package directory)
+npm run build        # Build package for distribution
+```
 
 **Frontend Development:**
 ```bash
@@ -243,8 +289,9 @@ This project is licensed under the MIT License.
 - TypeScript compilation with full type checking
 
 ### Dependencies
-- **Frontend**: React 18, TipTap extensions, marked (Markdown)
-- **Backend**: reqwest (HTTP), serde (JSON), Tauri plugins
-- **Development**: Vitest, @testing-library/react, TypeScript
+- **Frontend**: React 18, TipTap extensions, marked (Markdown), @tiptaptoe packages
+- **Backend**: reqwest (HTTP), serde (JSON), Tauri plugins (dialog, opener)
+- **AI Integration**: OpenAI/Claude APIs via @tiptaptoe/ai-core and @tiptaptoe/ai-react
+- **Development**: Vitest, @testing-library/react, TypeScript, Vite
 
 For more detailed technical information, see [CLAUDE.md](./CLAUDE.md).
