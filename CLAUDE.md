@@ -41,21 +41,27 @@ npm run test:coverage # Run tests with coverage report
   - Comment system with AI-powered analysis and threading
 - **Settings System**: Configurable AI provider settings stored locally
 - **Modular Component Libraries**:
+  - `@tiptaptoe/ai-core`: Core AI functionality and LLM clients
+  - `@tiptaptoe/ai-react`: React AI components and hooks
   - `@tiptaptoe/ui-components`: Reusable UI primitives and icons
   - `@tiptaptoe/tiptap-toolbar`: Complete TipTap toolbar component library
   - `@tiptaptoe/tiptap-editor`: Configurable TipTap editor with plugin system
   - `@tiptaptoe/extension-comments`: Transaction-based commenting system with threading
 - **Component Structure**:
-  - `SimpleEditor`: Main TipTap editor with toolbar
-  - `ChatBubble` + `ChatDialog`: AI chat interface
-  - `GenerateButton`: PDF upload and AI summarization
-  - `SettingsModal`: AI configuration interface
+  - `AppEditor`: Main TipTap editor with toolbar integration
+  - `ChatBubble` + `ChatDialog`: AI chat interface (from @tiptaptoe/ai-react)
+  - `GenerateButton`: PDF upload and AI summarization (from @tiptaptoe/ai-react)
+  - `SettingsModal`: AI configuration interface (from @tiptaptoe/ai-react)
   - `TransactionCommentManager`: Comment system with undo/redo support
 
 ### Backend Architecture (Rust + Tauri)
-- **AI Client** (`ai_client.rs`): OpenAI-compatible API client with error handling
-- **PDF Processing** (`pdf_processor.rs`): PDF text extraction
-- **Commands** (`commands.rs`): Tauri command handlers for frontend-backend communication
+- **AI Commands** (`ai_commands.rs`): Tauri command handlers for AI operations
+- **PDF Commands** (`pdf_commands.rs`): PDF processing command handlers
+- **LLM Clients**: OpenAI and Claude client implementations in `llm/` directory
+  - `llm/openai/`: OpenAI API client with models and services
+  - `llm/claude/`: Claude API client with models and services
+  - `llm/factory.rs`: Unified client factory for different AI providers
+- **PDF Processing**: Text extraction and validation in `pdf/` directory
 - **File Operations**: Document save/load functionality
 
 ### Key Integration Points
@@ -66,15 +72,23 @@ npm run test:coverage # Run tests with coverage report
 
 ### Dependencies
 - **Frontend**: TipTap extensions, React 18, marked (Markdown parsing)
-- **Internal Libraries**: `@tiptaptoe/ui-components`, `@tiptaptoe/tiptap-toolbar`
+- **Internal Libraries**: 
+  - `@tiptaptoe/ai-core`: Core AI functionality and LLM clients
+  - `@tiptaptoe/ai-react`: React AI components and hooks
+  - `@tiptaptoe/ui-components`: Base UI components and icons
+  - `@tiptaptoe/tiptap-toolbar`: TipTap toolbar components
+  - `@tiptaptoe/tiptap-editor`: Configurable editor component
+  - `@tiptaptoe/extension-comments`: Comment system extension
 - **Backend**: reqwest (HTTP), serde (JSON), Tauri plugins (dialog, opener)
 
 ## Important Implementation Details
 
 ### AI Features
-- Both PDF summarization and chat use the same `OpenAIClient` with configurable base URLs
+- AI functionality is centralized in `@tiptaptoe/ai-core` and `@tiptaptoe/ai-react` packages
+- Support for multiple AI providers (OpenAI, Claude) through unified client interface
+- PDF summarization and chat use configurable AI clients with provider-specific implementations
 - Chat responses can be applied as "replace" or "append" actions in the editor
-- AI settings are stored and migrated through `settingsStorage.ts`
+- AI settings are managed through `@tiptaptoe/ai-core` settings storage utilities
 - Comment system integrates with AI workflows for document analysis and revision
 
 ### Comment System
@@ -97,6 +111,23 @@ npm run test:coverage # Run tests with coverage report
 
 ## Extracted Libraries
 
+### @tiptaptoe/ai-core
+Core AI functionality and LLM client implementations:
+- **LLM Clients**: Unified OpenAI and Claude API clients with error handling
+- **PDF Processing**: Text extraction and document analysis capabilities
+- **Settings Management**: AI provider configuration and storage utilities
+- **Client Factory**: Factory pattern for creating different AI provider clients
+- **Type Definitions**: Comprehensive TypeScript types for AI operations
+
+### @tiptaptoe/ai-react
+React components and hooks for AI integration:
+- **Chat Components**: ChatDialog, ChatBubble, ChatMessage, ChatMessages
+- **Settings Components**: SettingsModal, BasicSettings, AdvancedSettings, ConnectionStatus
+- **File Context**: FileContextProvider and PDF upload management
+- **AI Hooks**: useAISettings, useChat for AI state management
+- **Generate Button**: PDF summarization and AI content generation component
+- **UI Components**: Alert, Button, Input, LoadingSpinner, Modal, Select, Textarea
+
 ### @tiptaptoe/ui-components
 Reusable UI primitives and utilities:
 - **Components**: Button, Toolbar, Dropdown, Portal, Spacer
@@ -114,6 +145,13 @@ Complete TipTap toolbar component library:
 - **Actions**: UndoRedoButton
 - **UI**: ThemeToggle
 - **Hooks**: useCursorVisibility
+
+### @tiptaptoe/tiptap-editor
+Configurable TipTap editor with plugin system:
+- **Editor Component**: TiptapEditor with customizable configuration
+- **Toolbar Integration**: ConfigurableToolbar component
+- **Configuration Hooks**: useEditorConfig for editor setup and management
+- **Type Definitions**: Editor configuration and extension types
 
 ### @tiptaptoe/extension-comments
 Transaction-based commenting system with comprehensive features:
